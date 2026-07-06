@@ -4,10 +4,8 @@ import { useI18n } from 'vue-i18n'
 import { useLocalizedBenefits } from '../../composables/useLocalizedContent'
 import { gsap } from '../../composables/useLenis'
 import { countUp } from '../../composables/useAnimations'
+import { useBenefitHover } from '../../composables/useBenefitHover'
 import { useSectionLife } from '../../composables/useSectionLife'
-import BeachDecor from '../tropical/BeachDecor.vue'
-import SmallLeaves from '../tropical/SmallLeaves.vue'
-import SectionAmbient from '../atmosphere/SectionAmbient.vue'
 
 const { t } = useI18n()
 const benefits = useLocalizedBenefits()
@@ -16,6 +14,7 @@ const statRefs = ref([])
 const activeSlide = ref(0)
 
 useSectionLife(sectionRef)
+useBenefitHover(sectionRef)
 
 function onCarouselScroll(e) {
   const el = e.target
@@ -48,12 +47,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="benefits" ref="sectionRef" data-nav-contrast="light" class="relative overflow-hidden py-16 md:py-40">
-    <SectionAmbient variant="sand" :intensity="0.4" :show-particles="false" :show-bubbles="false" />
-    <SmallLeaves />
-    <BeachDecor light minimal />
+  <section id="benefits" ref="sectionRef" data-nav-contrast="light" class="section-sand relative overflow-hidden py-16 md:py-40">
     <div class="content-layer relative z-10 mx-auto max-w-7xl px-5 md:px-8">
-      <div class="benefits-heading mb-8 text-center md:mb-20">
+      <div class="benefits-heading mb-10 text-center md:mb-24">
         <p class="mb-3 font-body text-sm tracking-[0.3em] text-[#4AAB9E] uppercase">{{ t('benefits.eyebrow') }}</p>
         <h2 class="font-display text-3xl font-bold text-[#2A2018] md:text-6xl">
           {{ t('benefits.title') }} <span class="gradient-text">{{ t('benefits.titleHighlight') }}</span>
@@ -69,11 +65,11 @@ onMounted(() => {
         <div
           v-for="(benefit, i) in benefits"
           :key="benefit.id"
-          class="peek-carousel__card benefit-card glass-ice group relative overflow-hidden rounded-3xl p-6 transition-all duration-500 md:p-10"
+          class="peek-carousel__card benefit-card benefit-card--premium group relative overflow-hidden rounded-3xl bg-white p-6 shadow-[0_8px_32px_rgba(42,32,24,0.08)] md:p-10"
           :style="{ borderColor: `${benefit.accent}33` }"
         >
           <div
-            class="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl opacity-30 md:h-40 md:w-40"
+            class="benefit-card__glow pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl opacity-30 md:h-40 md:w-40"
             :style="{ background: benefit.accent }"
             aria-hidden="true"
           />
@@ -83,9 +79,10 @@ onMounted(() => {
               <span class="mb-1 font-display text-lg font-bold text-[#2A2018]/50 md:mb-2 md:text-2xl">{{ benefit.unit }}</span>
             </div>
             <h3 class="mb-2 font-display text-xl font-bold text-[#2A2018] md:text-3xl">{{ benefit.title }}</h3>
-            <p class="font-body text-sm text-[#2A2018]/60 md:text-base">{{ benefit.description }}</p>
+            <p class="font-body text-sm text-[#2A2018]/60 md:hidden md:text-base">{{ benefit.description }}</p>
+            <p class="benefit-card__detail hidden translate-y-2 font-body text-sm text-[#2A2018]/75 opacity-0 md:block md:text-base">{{ benefit.description }}</p>
           </div>
-          <div class="absolute bottom-5 right-5 z-10 flex h-9 w-9 items-center justify-center rounded-full md:bottom-6 md:right-6 md:h-10 md:w-10" :style="{ background: `${benefit.accent}22`, color: benefit.accent }">
+          <div class="absolute bottom-5 right-5 z-10 flex h-9 w-9 items-center justify-center rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100 md:bottom-6 md:right-6 md:h-10 md:w-10 benefit-card__check" :style="{ background: `${benefit.accent}22`, color: benefit.accent }">
             <svg class="h-4 w-4 md:h-5 md:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
           </div>
         </div>

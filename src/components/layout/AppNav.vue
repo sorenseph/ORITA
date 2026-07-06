@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia'
 import { useCartStore } from '../../stores/cart'
 import { useAuthStore } from '../../stores/auth'
 import { useThemeStore } from '../../stores/theme'
-import { scrollTo, stopScroll, startScroll } from '../../composables/useLenis'
+import { scrollTo, stopScroll, startScroll, getLenis } from '../../composables/useLenis'
 import { useNavSurface } from '../../composables/useNavSurface'
 import { setLocale } from '../../i18n'
 import gsap from 'gsap'
@@ -18,7 +18,9 @@ const auth = useAuthStore()
 const { activeFlavor } = storeToRefs(useThemeStore())
 
 const navRef = ref(null)
+const shellRef = ref(null)
 const menuOpen = ref(false)
+const compact = ref(false)
 
 function getAutoNavTone() {
   return activeFlavor.value.textOnBg === '#2A2018' ? 'dark-text' : 'light-text'
@@ -69,6 +71,25 @@ function handleAccount() {
 
 onMounted(() => {
   gsap.from(navRef.value, { y: -40, opacity: 0, duration: 1, delay: 0.2, ease: 'power3.out' })
+
+  const onScroll = () => {
+    const y = window.scrollY || document.documentElement.scrollTop
+    const next = y > 72
+    if (next === compact.value) return
+    compact.value = next
+    if (shellRef.value) {
+      gsap.to(shellRef.value, {
+        height: next ? 48 : 56,
+        scale: next ? 0.96 : 1,
+        duration: 0.45,
+        ease: 'power3.out',
+      })
+    }
+  }
+  onScroll()
+  const lenis = getLenis()
+  if (lenis) lenis.on('scroll', onScroll)
+  else window.addEventListener('scroll', onScroll, { passive: true })
 })
 </script>
 
@@ -78,8 +99,12 @@ onMounted(() => {
     class="nav-shell pointer-events-none fixed inset-x-0 top-0 z-50 px-[3vw] pt-5 md:top-0 md:px-6 md:pt-6"
   >
     <div
-      class="nav-glass pointer-events-auto mx-auto flex h-[52px] max-w-6xl items-center justify-between gap-3 rounded-full border px-4 md:h-[56px] md:gap-4 md:px-6"
-      :class="isLightUi ? 'nav-glass--light' : 'nav-glass--dark'"
+      ref="shellRef"
+      class="nav-glass pointer-events-auto mx-auto flex h-[52px] max-w-6xl items-center justify-between gap-3 rounded-full border px-4 transition-[backdrop-filter] duration-500 md:h-[56px] md:gap-4 md:px-6"
+      :class="[
+        isLightUi ? 'nav-glass--light' : 'nav-glass--dark',
+        compact ? 'nav-glass--compact shadow-lg' : '',
+      ]"
     >
       <a
         href="#"

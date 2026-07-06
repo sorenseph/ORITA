@@ -45,26 +45,45 @@ export function parallax(el, speed = 0.3) {
   })
 }
 
-export function magneticButton(el) {
+export function magneticButton(el, options = {}) {
   if (!el) return
+
+  const { strength = 0.38, glow = true } = options
+  el.classList.add('magnetic-btn--active')
 
   const onMove = (e) => {
     const rect = el.getBoundingClientRect()
     const x = e.clientX - rect.left - rect.width / 2
     const y = e.clientY - rect.top - rect.height / 2
-    gsap.to(el, { x: x * 0.3, y: y * 0.3, duration: 0.4, ease: 'power2.out' })
+    gsap.to(el, {
+      x: x * strength,
+      y: y * strength,
+      scale: 1.04,
+      boxShadow: glow ? '0 12px 40px rgba(74, 171, 158, 0.35)' : undefined,
+      duration: 0.35,
+      ease: 'power3.out',
+    })
   }
 
   const onLeave = () => {
-    gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' })
+    gsap.to(el, {
+      x: 0,
+      y: 0,
+      scale: 1,
+      boxShadow: '0 0 0 rgba(0,0,0,0)',
+      duration: 0.75,
+      ease: 'elastic.out(1, 0.45)',
+    })
   }
 
   el.addEventListener('mousemove', onMove)
   el.addEventListener('mouseleave', onLeave)
 
   return () => {
+    el.classList.remove('magnetic-btn--active')
     el.removeEventListener('mousemove', onMove)
     el.removeEventListener('mouseleave', onLeave)
+    gsap.set(el, { clearProps: 'x,y,scale,boxShadow' })
   }
 }
 

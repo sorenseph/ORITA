@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { flavorVisuals, storyStepIds, labIngredientIds, benefitIds, mapMarkers, testimonialMeta, productVisuals } from '../data/content'
+import { flavorVisuals, storyStepIds, labIngredientIds, labIngredientVisuals, benefitIds, mapMarkers, testimonialMeta, productVisuals } from '../data/content'
 import { storyStepVisuals } from '../data/storySteps'
 
 export function useLocalizedFlavors() {
@@ -60,6 +60,10 @@ export function useLocalizedLabIngredients() {
       detail: t(`lab.items.${i18nKeys[id]}.detail`),
       color: colors[id],
       float: floats[id],
+      img: labIngredientVisuals[id]?.img,
+      cardBg: labIngredientVisuals[id]?.cardBg || '#FFFFFF',
+      accent: labIngredientVisuals[id]?.accent || colors[id],
+      imgSize: labIngredientVisuals[id]?.imgSize,
     }))
   )
 }

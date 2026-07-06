@@ -15,6 +15,9 @@
   --color-orita-hibiscus: #d45682;
   --color-orita-cream: #faf8f3;
   --color-orita-ink: #2a2018;
+  --color-orita-turquoise: #3bbfa3;
+  --color-orita-sea: #1a5c54;
+  --color-orita-warm-white: #fff8f0;
 }
 
 @layer base {
@@ -224,6 +227,40 @@
       width: auto;
       max-width: none;
     }
+  }
+
+  .magnetic-btn--active {
+    will-change: transform;
+    transition: box-shadow 0.35s ease;
+  }
+
+  .narrative-flow {
+    background: transparent;
+  }
+
+  .narrative-body > section {
+    background: transparent;
+  }
+
+  .benefit-card--premium {
+    transform-origin: center bottom;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease;
+  }
+
+  @media (hover: hover) {
+    .benefit-card--premium:hover {
+      transform: translateY(-10px) rotate(2deg);
+      box-shadow: 0 24px 60px rgba(42, 32, 24, 0.12);
+    }
+  }
+
+  .nav-glass--compact {
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  }
+
+  .footer-bottle-stage img {
+    transform-origin: bottom center;
   }
 }
 

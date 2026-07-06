@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { scrollTo } from '../../composables/useLenis'
 import { gsap } from '../../composables/useLenis'
 import { useSectionLife } from '../../composables/useSectionLife'
+import { useBottlePresence } from '../../composables/useBottlePresence'
 import { useCartStore } from '../../stores/cart'
 import { useLegalStore } from '../../stores/legal'
 import { AGAVE_IMG, AGAVE_WALLPAPER } from '../../data/agaveAssets'
@@ -14,6 +15,8 @@ const cart = useCartStore()
 const legal = useLegalStore()
 const footerRef = ref(null)
 const ctaRef = ref(null)
+const bottleFloatRef = ref(null)
+const bottleTiltRef = ref(null)
 
 const shopLinks = [
   { key: 'shop', href: '#shop' },
@@ -35,11 +38,16 @@ const legalLinks = [
 ]
 
 useSectionLife(footerRef)
+useBottlePresence(bottleFloatRef, bottleTiltRef, { idleDuration: 12 })
 
 onMounted(() => {
   gsap.from(ctaRef.value, {
-    y: 40, opacity: 0, duration: 1.2, ease: 'power3.out',
+    y: 50, opacity: 0, duration: 1.2, ease: 'power3.out',
     scrollTrigger: { trigger: footerRef.value, start: 'top 85%' },
+  })
+  gsap.from('.footer-bottle-stage', {
+    y: 80, opacity: 0, scale: 0.92, duration: 1.4, ease: 'power3.out',
+    scrollTrigger: { trigger: footerRef.value, start: 'top 80%' },
   })
 })
 
@@ -79,11 +87,28 @@ function onLinkClick(link) {
       />
     </div>
 
-    <div ref="ctaRef" class="content-layer relative border-t border-white/10 px-5 pb-14 pt-20 text-center md:px-8 md:pb-16 md:pt-24">
-      <img src="/images/logo_footer.png" alt="Orita" class="mx-auto mb-8 h-14 w-auto md:h-16" loading="lazy" />
+    <div ref="ctaRef" class="content-layer relative border-t border-white/10 px-5 pb-14 pt-8 text-center md:px-8 md:pb-16 md:pt-12">
+      <div class="footer-bottle-stage relative mx-auto mb-2 flex max-w-4xl items-end justify-center">
+        <div
+          class="pointer-events-none absolute bottom-[6%] left-1/2 h-[14%] w-[55%] -translate-x-1/2 rounded-full bg-[#4AAB9E]/35 blur-3xl"
+          aria-hidden="true"
+        />
+        <div ref="bottleFloatRef" class="relative" style="perspective: 1200px">
+          <div ref="bottleTiltRef" style="transform-style: preserve-3d">
+            <img
+              src="/images/bottle_1.webp"
+              alt=""
+              class="mx-auto h-[min(52vh,420px)] w-auto max-w-none object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.45)] md:h-[min(58vh,520px)]"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </div>
+
+      <img src="/images/logo_footer.png" alt="Orita" class="mx-auto mb-6 h-12 w-auto opacity-90 md:h-14" loading="lazy" />
       <button
         type="button"
-        class="magnetic-btn font-editorial text-[clamp(2rem,8vw,5rem)] leading-tight text-white transition-transform"
+        class="magnetic-btn font-editorial text-[clamp(2.25rem,9vw,5.5rem)] leading-[0.95] text-white transition-transform"
         @click="scrollTo('#shop', { offset: -96 })"
       >
         {{ t('footer.cta') }}

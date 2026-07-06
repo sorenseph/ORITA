@@ -6,7 +6,10 @@ import { useThemeStore } from '../../stores/theme'
 import { useLocalizedFlavors } from '../../composables/useLocalizedContent'
 import { useOrganicMotion } from '../../composables/useOrganicMotion'
 import { useMouseDepth } from '../../composables/useMouseDepth'
+import { useBottlePresence } from '../../composables/useBottlePresence'
 import HeroBottle3D from './HeroBottle3D.vue'
+import HeroCondensation from './HeroCondensation.vue'
+import BottleWaterSheen from './BottleWaterSheen.vue'
 import gsap from 'gsap'
 
 const props = defineProps({
@@ -18,9 +21,10 @@ const { activeFlavorIndex, activeFlavor } = storeToRefs(theme)
 const localizedFlavors = useLocalizedFlavors()
 const { width } = useWindowSize()
 const { parallax, mx, my } = useMouseDepth()
-const { float, breathe, sway, killAll } = useOrganicMotion()
+const { killAll } = useOrganicMotion()
 
 const parallaxRef = ref(null)
+const tiltRef = ref(null)
 const floatRef = ref(null)
 const backRef = ref(null)
 const frontRef = ref(null)
@@ -90,6 +94,8 @@ function startOrganicMotion() {
   killAll()
 }
 
+useBottlePresence(floatRef, tiltRef, { idleDuration: 12 })
+
 onMounted(() => {
   setBottleRest()
   startOrganicMotion()
@@ -138,22 +144,27 @@ watch(isMobile, () => {
       :style="parallaxStyle"
     >
       <div ref="floatRef" class="flex h-full w-full flex-col items-center justify-end pb-0 md:justify-center">
-        <div class="bottle-stage">
-          <img ref="backRef" :src="activeFlavor.bottle" alt="" aria-hidden="true" class="bottle-back" loading="lazy" />
-          <img
-            ref="frontRef"
-            :src="activeFlavor.bottle"
-            :alt="`Orita ${current?.name || ''}`"
-            class="bottle-front"
-            width="260"
-            height="760"
-            fetchpriority="high"
-          />
-        </div>
-        <div class="bottle-reflection">
-          <div class="bottle-stage bottle-stage--mirror">
-            <img ref="backMirrorRef" :src="activeFlavor.bottle" alt="" class="bottle-back" loading="lazy" />
-            <img ref="frontMirrorRef" :src="activeFlavor.bottle" alt="" class="bottle-front" loading="lazy" />
+        <div ref="tiltRef" class="bottle-tilt flex w-full flex-col items-center" style="transform-style: preserve-3d">
+          <div class="bottle-stage bottle-stage--lit">
+            <HeroCondensation :tint="`${activeFlavor.primary}55`" />
+            <BottleWaterSheen />
+            <img ref="backRef" :src="activeFlavor.bottle" alt="" aria-hidden="true" class="bottle-back" loading="lazy" />
+            <img
+              ref="frontRef"
+              :src="activeFlavor.bottle"
+              :alt="`Orita ${current?.name || ''}`"
+              class="bottle-front"
+              width="260"
+              height="760"
+              fetchpriority="high"
+            />
+            <div class="bottle-bloom pointer-events-none absolute inset-0" aria-hidden="true" />
+          </div>
+          <div class="bottle-reflection">
+            <div class="bottle-stage bottle-stage--mirror">
+              <img ref="backMirrorRef" :src="activeFlavor.bottle" alt="" class="bottle-back" loading="lazy" />
+              <img ref="frontMirrorRef" :src="activeFlavor.bottle" alt="" class="bottle-front" loading="lazy" />
+            </div>
           </div>
         </div>
       </div>
@@ -215,6 +226,16 @@ watch(isMobile, () => {
   will-change: transform, opacity;
 }
 
+.bottle-stage--lit {
+  position: relative;
+}
+
+.bottle-bloom {
+  background: radial-gradient(ellipse 55% 70% at 50% 45%, rgba(255, 255, 255, 0.22), transparent 68%);
+  mix-blend-mode: soft-light;
+  z-index: 12;
+}
+
 .bottle-front {
   position: relative;
   z-index: 10;
@@ -223,7 +244,7 @@ watch(isMobile, () => {
   width: auto;
   max-width: none;
   object-fit: contain;
-  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.28));
+  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.28)) brightness(1.04) contrast(1.02);
   will-change: transform, opacity;
 }
 

@@ -37,7 +37,7 @@ function onLoaderDone() {
     <AppNav />
     <main class="relative">
       <HeroSection />
-      <div class="section-sand tropical-grain section-sand--light" data-nav-contrast="light">
+      <div data-nav-contrast="light">
         <StoryLabSection />
         <FlavorsSection />
         <BenefitsSection />

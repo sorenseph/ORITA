@@ -4,9 +4,10 @@ import { useCustomCursor } from '../../composables/useCustomCursor'
 
 const outerRef = ref(null)
 const innerRef = ref(null)
-const { x, y, mode, flavorEmoji, visible, active, init, update, destroy } = useCustomCursor()
+const { mode, flavorEmoji, flavorTint, visible, active, init, update, bindFlavorZones, destroy } = useCustomCursor()
 
 let raf = null
+let unbindZones = null
 
 function loop() {
   update()
@@ -16,11 +17,13 @@ function loop() {
 onMounted(() => {
   if (!active.value) return
   init(outerRef.value, innerRef.value)
+  unbindZones = bindFlavorZones()
   raf = requestAnimationFrame(loop)
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(raf)
+  unbindZones?.()
   destroy()
 })
 </script>
@@ -29,11 +32,16 @@ onUnmounted(() => {
   <div v-if="active && visible" class="custom-cursor" aria-hidden="true">
     <div
       ref="outerRef"
-      class="cursor-outer fixed top-0 left-0 z-[9999] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40 mix-blend-difference"
+      class="cursor-outer fixed top-0 left-0 z-[9999] -translate-x-1/2 -translate-y-1/2 rounded-full border mix-blend-difference"
       :class="[
         mode === 'liquid' ? 'cursor-outer--liquid' : '',
         mode === 'flavor' ? 'cursor-outer--flavor' : '',
       ]"
+      :style="{
+        borderColor: mode === 'flavor' ? flavorTint : 'rgba(255,255,255,0.4)',
+        background: mode === 'flavor' ? `${flavorTint}33` : undefined,
+        boxShadow: mode === 'flavor' ? `0 0 24px ${flavorTint}88` : undefined,
+      }"
     >
       <span v-if="mode === 'flavor'" class="cursor-emoji">{{ flavorEmoji }}</span>
     </div>

@@ -2,8 +2,17 @@ import { ref, computed } from 'vue'
 import { useMouse, usePreferredReducedMotion, useMediaQuery } from '@vueuse/core'
 import gsap from 'gsap'
 
+const FLAVOR_COLORS = {
+  tamarind: '#D4734A',
+  guava: '#E8C84A',
+  lime: '#4AAB9E',
+  hibiscus: '#D45682',
+  default: 'rgba(255,255,255,0.35)',
+}
+
 const mode = ref('default')
 const flavorEmoji = ref('✨')
+const flavorTint = ref(FLAVOR_COLORS.default)
 const visible = ref(false)
 
 let outerX = null
@@ -39,9 +48,29 @@ export function useCustomCursor() {
     innerY(y.value)
   }
 
-  function setMode(next, emoji = '✨') {
+  function setMode(next, emoji = '✨', tint = null) {
     mode.value = next
     flavorEmoji.value = emoji
+    if (tint) flavorTint.value = tint
+  }
+
+  function setFlavorTint(flavorId) {
+    flavorTint.value = FLAVOR_COLORS[flavorId] || FLAVOR_COLORS.default
+    mode.value = 'flavor'
+  }
+
+  function bindFlavorZones() {
+    if (!active.value) return () => {}
+    const onOver = (e) => {
+      const zone = e.target.closest?.('[data-cursor-flavor]')
+      if (zone) setFlavorTint(zone.dataset.cursorFlavor)
+      else if (mode.value === 'flavor' && !e.target.closest?.('[data-cursor-zone]')) {
+        mode.value = 'default'
+        flavorTint.value = FLAVOR_COLORS.default
+      }
+    }
+    document.addEventListener('mouseover', onOver, { passive: true })
+    return () => document.removeEventListener('mouseover', onOver)
   }
 
   function destroy() {
@@ -52,5 +81,5 @@ export function useCustomCursor() {
     mode.value = 'default'
   }
 
-  return { x, y, mode, flavorEmoji, visible, active, init, update, setMode, destroy }
+  return { x, y, mode, flavorEmoji, flavorTint, visible, active, init, update, setMode, setFlavorTint, bindFlavorZones, destroy }
 }

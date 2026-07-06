@@ -5,7 +5,6 @@ import { useCartStore } from '../../stores/cart'
 import { useLocalizedProducts } from '../../composables/useLocalizedContent'
 import { gsap, ScrollTrigger, scrollTo } from '../../composables/useLenis'
 import { useSectionLife } from '../../composables/useSectionLife'
-import TropicalSplash from '../tropical/TropicalSplash.vue'
 
 const { t } = useI18n()
 const cart = useCartStore()
@@ -63,8 +62,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section id="shop" ref="sectionRef" data-nav-contrast="dark" class="section-green relative overflow-hidden py-24 md:py-40">
-    <TropicalSplash color="#F7F0E3" flip simple />
+  <section id="shop" ref="sectionRef" data-nav-contrast="dark" class="section-green relative overflow-hidden py-20 md:py-32">
     <div class="content-layer relative z-10 mx-auto max-w-7xl px-5 md:px-8">
       <div class="shop-heading mb-10 md:mb-14">
         <p class="mb-3 font-body text-sm tracking-[0.3em] text-white/70 uppercase">{{ t('shop.eyebrow') }}</p>

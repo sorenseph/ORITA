@@ -1,5 +1,7 @@
 /** Datos visuales — textos viven en i18n */
 
+import { AGAVE_IMG, AGAVE_WALLPAPER } from './agaveAssets.js'
+
 export const flavorVisuals = [
   {
     id: 'tamarind',
@@ -8,11 +10,20 @@ export const flavorVisuals = [
     product: '/images/productos_tam1.webp',
     primary: '#C45C3E',
     secondary: '#D4734A',
-    accent: '#F4E4D4',
-    bgColor: '#D4734A',
-    bg: '#D4734A',
+    accent: '#FFF8E0',
+    bgColor: '#C45C3E',
+    bg: '#C45C3E',
     waveColor: '#F7F0E3',
     textOnBg: '#FFFFFF',
+    campaign: {
+      bg: '#C45C3E',
+      accent: '#FFF8E0',
+      accent2: '#E8C84A',
+      layout: 'wedge-bl',
+      decor: '/recursos/tamarindo/tamarindo.png',
+      decorPosition: 'right-bottom',
+      textOnBg: '#FFFFFF',
+    },
     liquid: '#E63946',
     audio: { fizz: 180, warmth: 220 },
     ingredients: [
@@ -35,11 +46,22 @@ export const flavorVisuals = [
     product: '/images/productos_guayaba1.webp',
     primary: '#C2185B',
     secondary: '#D4567A',
-    accent: '#FFF8E7',
-    bgColor: '#E8C84A',
-    bg: '#E8C84A',
+    accent: '#FFD400',
+    bgColor: '#94104D',
+    bg: '#94104D',
     waveColor: '#FFF8E7',
-    textOnBg: '#2A2018',
+    textOnBg: '#FFFFFF',
+    campaign: {
+      bg: '#94104D',
+      accent: '#FFD400',
+      accent2: '#C2185B',
+      layout: 'wedge-tr',
+      platform: '#7A0E3A',
+      platformHeight: '14%',
+      decor: '/images/guayaba1.png',
+      decorPosition: 'right',
+      textOnBg: '#FFFFFF',
+    },
     liquid: '#F72585',
     audio: { fizz: 240, warmth: 280 },
     ingredients: [
@@ -62,11 +84,20 @@ export const flavorVisuals = [
     product: '/images/productos_limon1.webp',
     primary: '#2A8F82',
     secondary: '#4AAB9E',
-    accent: '#E8F6F3',
-    bgColor: '#4AAB9E',
-    bg: '#4AAB9E',
+    accent: '#FFD400',
+    bgColor: '#3BBFA3',
+    bg: '#3BBFA3',
     waveColor: '#E8F6F3',
-    textOnBg: '#FFFFFF',
+    textOnBg: '#2A2018',
+    campaign: {
+      bg: '#3BBFA3',
+      accent: '#FFD400',
+      accent2: '#2A8F82',
+      layout: 'split-lime',
+      decor: '/recursos/limones/1limon.png',
+      decorPosition: 'right-bottom',
+      textOnBg: '#2A2018',
+    },
     liquid: '#06D6A0',
     audio: { fizz: 320, warmth: 400 },
     ingredients: [
@@ -89,11 +120,22 @@ export const flavorVisuals = [
     product: '/images/productos_jamaica1.webp',
     primary: '#B83A6B',
     secondary: '#D45682',
-    accent: '#FCE8EF',
-    bgColor: '#D45682',
-    bg: '#D45682',
+    accent: '#FFD400',
+    bgColor: '#8B1A4A',
+    bg: '#8B1A4A',
     waveColor: '#FCE8EF',
     textOnBg: '#FFFFFF',
+    campaign: {
+      bg: '#8B1A4A',
+      accent: '#FFD400',
+      accent2: '#D45682',
+      layout: 'wedge-tr',
+      platform: '#6E1238',
+      platformHeight: '14%',
+      decor: '/images/jamaica1.png',
+      decorPosition: 'left',
+      textOnBg: '#FFFFFF',
+    },
     liquid: '#9B5DE5',
     audio: { fizz: 200, warmth: 260 },
     ingredients: [
@@ -114,6 +156,15 @@ export const flavors = flavorVisuals
 
 export const storyStepIds = ['water', 'agave', 'fruit', 'bubble', 'orita']
 export const labIngredientIds = ['agave', 'mineral', 'fruit', 'inulin', 'herbs', 'zero-cane']
+
+export const labIngredientVisuals = {
+  agave: { img: AGAVE_IMG, cardBg: '#FFF8E0', accent: '#C4A035', imgSize: 'large' },
+  mineral: { img: '/svg/water-drop.svg', cardBg: '#E8F6F3', accent: '#4AAB9E' },
+  fruit: { img: '/images/guayaba1.png', cardBg: '#FFF4EC', accent: '#D4734A' },
+  inulin: { img: AGAVE_WALLPAPER, cardBg: '#F0FAF8', accent: '#3D9A8E', imgSize: 'large' },
+  herbs: { img: '/images/romero1.png', cardBg: '#F5FAF0', accent: '#7A9E6B' },
+  'zero-cane': { img: '/svg/bubbles.svg', cardBg: '#FCE8EF', accent: '#D45682' },
+}
 export const benefitIds = ['calories', 'sugar', 'fiber', 'natural']
 export const locationIds = ['gdl', 'puerto-vallarta', 'tequila', 'bcs', 'oaxaca', 'cancun', 'north', 'pacific', 'gulf']
 

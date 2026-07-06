@@ -86,6 +86,7 @@ export default {
     prev: 'Sabor anterior',
     next: 'Siguiente sabor',
     learnMore: 'Conoce la fórmula',
+    scrollHint: 'Desliza para explorar cada sabor',
     addToCart: 'Agregar al carrito — ${price}',
     items: {
       tamarind: {

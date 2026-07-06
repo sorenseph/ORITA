@@ -10,6 +10,7 @@ import { useCartStore } from '../../stores/cart'
 import { getPackIdForFlavor, productVisuals } from '../../data/content'
 import { getAtmosphere } from '../../data/atmosphere'
 import { magneticButton } from '../../composables/useAnimations'
+import { editorialSplitChars, editorialSplitWords } from '../../composables/useEditorialSplit'
 import { useCustomCursor } from '../../composables/useCustomCursor'
 import HeroBottle from './HeroBottle.vue'
 import HeroCollage from './HeroCollage.vue'
@@ -25,8 +26,8 @@ const flavors = useLocalizedFlavors()
 const { setMode } = useCustomCursor()
 
 const sectionRef = ref(null)
+const brandRef = ref(null)
 const headlineRef = ref(null)
-const headlineTextRef = ref(null)
 const scrollProgress = ref(0)
 const autoplayTimer = ref(null)
 const isPaused = ref(false)
@@ -57,37 +58,23 @@ const bodyText = computed(() =>
 const primaryText = computed(() => (isDarkText.value ? '#2A2018' : '#fff'))
 
 let magneticCleanups = []
-let headlineTween = null
+let cleanupBrand = null
+let cleanupHeadline = null
 
 function addToCart() {
   cart.addItem(getPackIdForFlavor(activeFlavor.value.id), 1, true)
 }
 
+function animateBrand() {
+  cleanupBrand?.()
+  cleanupBrand = editorialSplitChars(brandRef.value, 'ORITA', { stagger: 0.065, delay: 0.1 })
+}
+
 function animateHeadline() {
-  const el = headlineRef.value
-  if (!el) return
-  headlineTween?.kill()
-
-  const text = editorialLine.value
-  el.innerHTML = ''
-  el.setAttribute('aria-label', text)
-
-  ;[...text].forEach((char, i) => {
-    const span = document.createElement('span')
-    span.className = 'split-char inline-block'
-    span.textContent = char === ' ' ? '\u00A0' : char
-    span.style.opacity = '0'
-    span.style.transform = 'translateY(100%) rotate(6deg)'
-    el.appendChild(span)
-
-    gsap.to(span, {
-      opacity: 1,
-      y: 0,
-      rotation: 0,
-      duration: 0.55,
-      delay: i * 0.035,
-      ease: 'back.out(1.35)',
-    })
+  cleanupHeadline?.()
+  cleanupHeadline = editorialSplitWords(headlineRef.value, editorialLine.value, {
+    stagger: 0.11,
+    delay: 0.35,
   })
 }
 
@@ -106,7 +93,7 @@ function setCtaRef(el) {
 }
 
 function onBottleEnter() {
-  setMode('flavor', activeFlavor.value.emoji || atmo.value.mood)
+  setMode('flavor', activeFlavor.value.emoji || atmo.value.mood, activeFlavor.value.primary)
 }
 
 function onBottleLeave() {
@@ -139,6 +126,7 @@ onMounted(async () => {
   }, 7000)
 
   await nextTick()
+  animateBrand()
   animateHeadline()
 
   magneticCleanups = ctaRefs.value.map((btn) => magneticButton(btn)).filter(Boolean)
@@ -146,9 +134,15 @@ onMounted(async () => {
 
 watch(editorialLine, () => nextTick(animateHeadline))
 
+watch(scrollProgress, (p) => {
+  if (p > 0.12) isPaused.value = true
+  else if (p < 0.04) isPaused.value = false
+})
+
 onUnmounted(() => {
   if (autoplayTimer.value) clearInterval(autoplayTimer.value)
-  headlineTween?.kill()
+  cleanupBrand?.()
+  cleanupHeadline?.()
   magneticCleanups.forEach((fn) => fn?.())
 })
 </script>
@@ -186,6 +180,7 @@ onUnmounted(() => {
         <div
           class="hero-visual order-1 flex min-h-0 items-end justify-center self-stretch md:order-2 md:items-center"
           data-cursor-zone="bottle"
+          :data-cursor-flavor="activeFlavor.id"
           @mouseenter="onBottleEnter"
           @mouseleave="onBottleLeave"
         >
@@ -193,6 +188,13 @@ onUnmounted(() => {
         </div>
 
         <div class="hero-copy order-2 flex min-h-0 flex-col justify-end pb-1 md:order-1 md:justify-center md:pb-0">
+          <p
+            ref="brandRef"
+            class="hero-brand mb-0.5 font-display text-[clamp(2rem,9vw,2.75rem)] font-extrabold leading-none tracking-tight md:mb-2 md:text-7xl"
+            :style="{ color: primaryText }"
+            aria-label="ORITA"
+          />
+
           <p
             class="hero-eyebrow mb-0.5 font-body text-[10px] font-medium tracking-[0.32em] uppercase md:mb-2 md:text-sm"
             :style="{ color: mutedText }"
@@ -232,7 +234,6 @@ onUnmounted(() => {
             class="hero-headline mt-0.5 font-editorial text-[clamp(1.05rem,4.2vw,1.35rem)] leading-[1.2] tracking-tight md:mt-4 md:text-[clamp(1.35rem,4.2vw,2.4rem)] md:leading-[1.12]"
             :style="{ color: primaryText }"
           />
-          <span ref="headlineTextRef" class="sr-only">{{ editorialLine }}</span>
 
           <p
             class="mt-1 hidden max-w-md font-body text-base leading-relaxed md:mt-3 md:block"

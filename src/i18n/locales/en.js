@@ -86,6 +86,7 @@ export default {
     prev: 'Previous flavor',
     next: 'Next flavor',
     learnMore: 'Learn the formula',
+    scrollHint: 'Scroll to explore each flavor',
     addToCart: 'Add to cart — ${price}',
     items: {
       tamarind: {
