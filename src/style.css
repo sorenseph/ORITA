@@ -101,6 +101,11 @@
     color: var(--color-orita-ink);
   }
 
+  .section-green {
+    background: var(--color-orita-ocean-deep);
+    color: white;
+  }
+
   .tropical-grain {
     background-image: url("/svg/sand.svg");
     background-size: 200px 200px;
@@ -110,13 +115,35 @@
     pointer-events: none;
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 5;
     overflow: hidden;
   }
 
   .content-layer {
     position: relative;
     z-index: 10;
+  }
+
+  .glass-ice {
+    background: rgba(255, 255, 255, 0.42);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 8px 32px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  body.custom-cursor-active,
+  body.custom-cursor-active button,
+  body.custom-cursor-active a {
+    cursor: none;
+  }
+
+  @media (pointer: coarse) {
+    body.custom-cursor-active,
+    body.custom-cursor-active button,
+    body.custom-cursor-active a {
+      cursor: auto;
+    }
   }
 
   @media (max-width: 767px) {
@@ -166,6 +193,37 @@
 
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  .peek-carousel {
+    display: flex;
+    gap: 0.625rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 11vw;
+    padding-inline: 11vw;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .peek-carousel__card {
+    width: 78vw;
+    max-width: 19rem;
+    flex-shrink: 0;
+    scroll-snap-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .peek-carousel {
+      display: grid;
+      overflow: visible;
+      scroll-padding-inline: 0;
+      padding-inline: 0;
+    }
+
+    .peek-carousel__card {
+      width: auto;
+      max-width: none;
+    }
   }
 }
 

@@ -3,7 +3,8 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCartStore } from '../../stores/cart'
 import { useLocalizedProducts } from '../../composables/useLocalizedContent'
-import { gsap, ScrollTrigger } from '../../composables/useLenis'
+import { gsap, ScrollTrigger, scrollTo } from '../../composables/useLenis'
+import { useSectionLife } from '../../composables/useSectionLife'
 import TropicalSplash from '../tropical/TropicalSplash.vue'
 
 const { t } = useI18n()
@@ -36,6 +37,8 @@ function toggleDetails(id) {
   expandedId.value = expandedId.value === id ? null : id
 }
 
+useSectionLife(sectionRef)
+
 onMounted(async () => {
   await nextTick()
   ScrollTrigger.refresh()
@@ -60,9 +63,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section id="shop" ref="sectionRef" data-nav-contrast="dark" class="relative bg-[#3BBFA3] py-24 text-white md:py-40">
-    <TropicalSplash color="#F7F0E3" flip />
-    <div class="relative z-10 mx-auto max-w-7xl px-5 md:px-8">
+  <section id="shop" ref="sectionRef" data-nav-contrast="dark" class="section-green relative overflow-hidden py-24 md:py-40">
+    <TropicalSplash color="#F7F0E3" flip simple />
+    <div class="content-layer relative z-10 mx-auto max-w-7xl px-5 md:px-8">
       <div class="shop-heading mb-10 md:mb-14">
         <p class="mb-3 font-body text-sm tracking-[0.3em] text-white/70 uppercase">{{ t('shop.eyebrow') }}</p>
         <h2 class="font-display text-4xl font-bold md:text-6xl lg:text-7xl">
@@ -71,15 +74,24 @@ onMounted(async () => {
         <p class="mt-4 max-w-2xl font-body text-base text-white/80 md:text-lg">{{ t('shop.intro') }}</p>
       </div>
 
-      <div class="mb-10 flex flex-wrap gap-2">
+      <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="f in filters"
+            :key="f.id"
+            class="rounded-full px-4 py-2 font-body text-sm transition-all md:px-5"
+            :class="filter === f.id ? 'bg-white font-semibold text-[#2A2018]' : 'bg-white/15 text-white/80 hover:bg-white/25 hover:text-white'"
+            @click="filter = f.id"
+          >
+            {{ f.label }}
+          </button>
+        </div>
         <button
-          v-for="f in filters"
-          :key="f.id"
-          class="rounded-full px-4 py-2 font-body text-sm transition-all md:px-5"
-          :class="filter === f.id ? 'bg-white font-semibold text-[#2A2018]' : 'bg-white/15 text-white/80 hover:bg-white/25 hover:text-white'"
-          @click="filter = f.id"
+          type="button"
+          class="magnetic-btn hidden items-center gap-2 rounded-full border border-white/25 px-4 py-2 font-body text-sm text-white/85 transition-colors hover:bg-white/10 sm:inline-flex"
+          @click="scrollTo('#tracking', { offset: -96 })"
         >
-          {{ f.label }}
+          {{ t('shop.trackOrder') }}
         </button>
       </div>
 
@@ -87,14 +99,14 @@ onMounted(async () => {
         <article
           v-for="product in filtered"
           :key="product.id"
-          class="product-card group overflow-hidden rounded-3xl bg-white text-[#2A2018] shadow-lg transition-shadow duration-300 hover:shadow-xl"
+          class="product-card glass-ice group overflow-hidden rounded-3xl text-[#2A2018] shadow-lg transition-shadow duration-500 hover:shadow-xl"
         >
           <div class="grid md:grid-cols-2">
             <div class="relative flex min-h-[220px] items-center justify-center bg-[#F7F0E3] p-6 md:min-h-[280px]">
               <div v-if="product.badge" class="absolute left-4 top-4 z-10 rounded-full bg-[#E8C84A] px-3 py-1 font-display text-xs font-bold text-[#2A2018]">
                 {{ product.badge }}
               </div>
-              <img :src="product.image" :alt="product.name" class="max-h-48 w-auto max-w-full object-contain transition-transform duration-500 group-hover:scale-105 md:max-h-52" loading="lazy" />
+              <img :src="product.image" :alt="product.name" class="product-bottle-img max-h-48 w-auto max-w-full object-contain md:max-h-52" loading="lazy" />
             </div>
 
             <div class="flex flex-col border-t border-[#2A2018]/8 p-5 md:border-l md:border-t-0 md:p-6">
@@ -134,7 +146,7 @@ onMounted(async () => {
                   <span class="ml-1 font-body text-xs text-[#2A2018]/45">MXN</span>
                 </div>
                 <button
-                  class="rounded-full bg-[#2A7A72] px-5 py-2.5 font-display text-sm font-bold text-white transition-all hover:scale-105"
+                  class="magnetic-btn rounded-full bg-[#2A7A72] px-5 py-2.5 font-display text-sm font-bold text-white transition-all"
                   @click="addToCart(product)"
                 >
                   {{ t('shop.add') }}
@@ -150,10 +162,10 @@ onMounted(async () => {
       </p>
 
       <div class="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-        <button class="rounded-full bg-white px-8 py-4 font-display text-base font-bold text-[#2A7A72] shadow-md transition-all hover:scale-105" @click="cart.openCart('drawer')">
+        <button class="magnetic-btn rounded-full bg-white px-8 py-4 font-display text-base font-bold text-[#2A7A72] shadow-md transition-all" @click="cart.openCart('drawer')">
           {{ t('shop.viewCart', { count: cart.itemCount }) }}
         </button>
-        <p class="font-body text-sm text-white/70">{{ t('shop.perPack') }} · $389 MXN</p>
+        <p class="font-body text-sm text-white/70">{{ t('shop.perPack') }} · $389 MXN · {{ t('shop.shippingNote') }}</p>
       </div>
     </div>
   </section>

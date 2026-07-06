@@ -9,6 +9,14 @@ export const useCartStore = defineStore('cart', () => {
   const couponCode = ref('')
   const couponApplied = ref(false)
   const checkoutStep = ref(1)
+  const lastTrackingCode = ref('')
+
+  function generateTrackingCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    let suffix = ''
+    for (let i = 0; i < 6; i++) suffix += chars[Math.floor(Math.random() * chars.length)]
+    return `ORITA-MX-${suffix}`
+  }
 
   const checkoutData = ref({
     name: '',
@@ -104,6 +112,7 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   function completeOrder() {
+    lastTrackingCode.value = generateTrackingCode()
     items.value = []
     couponApplied.value = false
     couponCode.value = ''
@@ -114,7 +123,7 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   return {
-    items, isOpen, view, couponCode, couponApplied, checkoutStep, checkoutData,
+    items, isOpen, view, couponCode, couponApplied, checkoutStep, checkoutData, lastTrackingCode,
     itemCount, subtotal, discount, shipping, total,
     addItem, updateQuantity, removeItem, applyCoupon,
     openCart, closeCart, startCheckout, nextCheckoutStep, prevCheckoutStep, completeOrder,

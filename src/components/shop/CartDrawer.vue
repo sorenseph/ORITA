@@ -10,6 +10,7 @@ const cart = useCartStore()
 const couponInput = ref('')
 const couponError = ref(false)
 const orderComplete = ref(false)
+const completedTracking = ref('')
 
 function productName(id) {
   const key = `shop.products.${id}.name`
@@ -34,13 +35,22 @@ function applyCoupon() {
 
 function finishOrder() {
   cart.completeOrder()
+  completedTracking.value = cart.lastTrackingCode
   orderComplete.value = true
-  setTimeout(() => { orderComplete.value = false }, 3500)
+  setTimeout(() => {
+    orderComplete.value = false
+    completedTracking.value = ''
+  }, 8000)
 }
 
 function goToShop() {
   cart.closeCart()
   scrollTo('#shop', { offset: -96 })
+}
+
+function goToTracking() {
+  cart.closeCart()
+  scrollTo('#tracking', { offset: -96 })
 }
 </script>
 
@@ -69,7 +79,19 @@ function goToShop() {
         </div>
 
         <Transition name="fade">
-          <div v-if="orderComplete" class="mx-5 mt-4 rounded-2xl bg-[#4AAB9E] p-4 text-center font-display font-bold text-white">{{ t('cart.orderDone') }}</div>
+          <div v-if="orderComplete" class="mx-5 mt-4 rounded-2xl bg-[#4AAB9E] p-4 text-center">
+            <p class="font-display font-bold text-white">{{ t('cart.orderDone') }}</p>
+            <p v-if="completedTracking" class="mt-2 font-body text-xs text-white/85">{{ t('cart.trackingLabel') }}</p>
+            <p v-if="completedTracking" class="mt-1 font-mono text-sm font-bold tracking-wide text-white">{{ completedTracking }}</p>
+            <button
+              v-if="completedTracking"
+              type="button"
+              class="mt-3 font-body text-xs text-white/80 underline underline-offset-2 hover:text-white"
+              @click="goToTracking"
+            >
+              {{ t('cart.trackShipment') }}
+            </button>
+          </div>
         </Transition>
 
         <div v-if="!cart.items.length && cart.view !== 'checkout'" class="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">

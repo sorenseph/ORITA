@@ -10,9 +10,38 @@ export default {
     menu: 'Menú',
     close: 'Cerrar menú',
     home: 'Orita inicio',
-    instagram: 'Instagram',
-    soundOn: 'Activar ambiente',
-    soundOff: 'Silenciar ambiente',
+    login: 'Iniciar sesión',
+    logout: 'Cerrar sesión',
+  },
+  auth: {
+    title: 'Tu cuenta Orita',
+    subtitle: 'Accede para guardar pedidos y rastrear envíos.',
+    email: 'Correo electrónico',
+    password: 'Contraseña',
+    submit: 'Entrar',
+    close: 'Cerrar',
+    demoNote: 'Acceso demo — la funcionalidad completa llegará pronto.',
+    errors: { required: 'Completa correo y contraseña.' },
+  },
+  tracking: {
+    eyebrow: 'Envíos',
+    title: 'Rastrea tu pedido',
+    hint: 'Introduce tu número de guía ORITA-MX-XXXXXX',
+    placeholder: 'ORITA-MX-…',
+    submit: 'Consultar',
+    notFound: 'No encontramos ese número. Verifica e intenta de nuevo.',
+    status: {
+      confirmed: 'Pedido confirmado',
+      preparing: 'Preparando tu pedido',
+      shipped: 'En camino',
+      delivered: 'Entregado',
+    },
+    steps: {
+      confirmed: 'Confirmado',
+      preparing: 'Preparando',
+      shipped: 'En ruta',
+      delivered: 'Entregado',
+    },
   },
   hero: {
     eyebrow: 'Agave Pop.',
@@ -90,6 +119,7 @@ export default {
     title: 'Ingredientes',
     titleHighlight: 'reales',
     intro: 'Lo que hay dentro de cada botella — sin atajos, sin artificio. Puro mercado mexicano.',
+    swipeHint: 'Desliza para ver más ingredientes →',
     items: {
       agave: {
         name: 'Jugo de Agave',
@@ -128,6 +158,7 @@ export default {
     title: 'Feel good',
     titleHighlight: 'after',
     intro: 'Ligero, natural y delicioso — como un día perfecto en la playa, en cada sorbo.',
+    swipeHint: 'Desliza para ver más →',
     items: {
       calories: { title: 'Bajo en calorías', description: 'Por envase completo. Ligero como debe ser.' },
       sugar: { title: 'Sin azúcar de caña', description: 'Endulzado con agave. Azúcares añadidos mínimos.' },
@@ -189,6 +220,8 @@ export default {
     showSpecs: '+ Ver especificaciones',
     hideSpecs: '− Menos detalles',
     viewCart: 'Ver carrito ({count})',
+    trackOrder: 'Rastrear pedido',
+    shippingNote: 'Envío simulado · checkout demo',
     specLabels: {
       pack: 'Presentación',
       volume: 'Volumen',
@@ -380,16 +413,165 @@ export default {
     },
     continue: 'Continuar',
     close: 'Cerrar',
+    trackingLabel: 'Tu número de rastreo:',
+    trackShipment: 'Ver estado del envío',
   },
   footer: {
     cta: 'Take Orita Home',
     tagline: 'Agave Pop. Hecho en México. 🇲🇽',
     subtagline: 'Refresco artesanal con agave, fruta real y burbujas de manantial.',
     buy: 'Comprar ahora',
+    about: 'Sodas mexicanas con agave, fruta real y agua de manantial. Hechas en México para compartir.',
+    paymentNote: 'Pagos simulados en esta demo. No se realizarán cargos reales.',
+    madeIn: 'Hecho con orgullo en México',
+    trackDiscrete: 'Rastrear envío',
     rights: '© {year} Orita. Todos los derechos reservados.',
+    columns: {
+      shop: 'Comprar',
+      explore: 'Explorar',
+      legal: 'Legal',
+    },
+    links: {
+      shop: 'Tienda',
+      track: 'Rastrear pedido',
+      cart: 'Mi carrito',
+      story: 'Historia',
+      flavors: 'Sabores',
+      map: 'Dónde encontrarnos',
+      contact: 'Contacto',
+      privacy: 'Privacidad',
+      terms: 'Términos',
+      shipping: 'Envíos',
+    },
   },
   meta: {
     title: 'Orita | Agave Pop. Hecho en México.',
     description: 'Orita — Agave Pop. Refrescos artesanales mexicanos con agua mineral, jugo de agave y fruta real.',
+  },
+  legal: {
+    eyebrow: 'Información legal',
+    close: 'Cerrar',
+    privacy: {
+      title: 'Aviso de Privacidad',
+      updated: 'Última actualización: 6 de julio de 2026',
+      intro: 'En Orita (“nosotros”), con domicilio en México, respetamos tu privacidad y protegemos tus datos personales conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) y su Reglamento.',
+      sections: [
+        {
+          title: '1. Responsable del tratamiento',
+          paragraphs: [
+            'Orita Agave Pop es responsable del uso y protección de tus datos personales recabados a través de este sitio web, formularios de contacto, cuenta de usuario y procesos de compra en línea.',
+            'Para dudas sobre privacidad puedes escribirnos a través de la sección de contacto del sitio o a los canales oficiales publicados en nuestras redes sociales.',
+          ],
+        },
+        {
+          title: '2. Datos que recabamos',
+          paragraphs: [
+            'Podemos recabar: nombre, correo electrónico, teléfono, dirección de envío, datos de facturación, historial de pedidos, preferencias de idioma y datos técnicos de navegación (dirección IP, tipo de navegador, páginas visitadas).',
+            'En esta versión demo, el checkout y el inicio de sesión son simulados; no se procesan pagos reales ni se almacenan datos bancarios en servidores de producción.',
+          ],
+        },
+        {
+          title: '3. Finalidades del tratamiento',
+          paragraphs: [
+            'Usamos tus datos para: procesar pedidos y envíos; responder solicitudes de contacto; mejorar la experiencia del sitio; enviar comunicaciones sobre tu cuenta o pedidos (cuando aplique); cumplir obligaciones legales; y, con tu consentimiento, informarte sobre novedades y promociones de Orita.',
+            'Las finalidades secundarias de mercadotecnia requieren tu consentimiento expreso, el cual puedes revocar en cualquier momento.',
+          ],
+        },
+        {
+          title: '4. Transferencia de datos',
+          paragraphs: [
+            'Podemos compartir datos con proveedores de logística, pasarelas de pago, hospedaje web y herramientas de análisis, únicamente para las finalidades descritas y bajo acuerdos de confidencialidad.',
+            'No vendemos ni rentamos tus datos personales a terceros con fines publicitarios.',
+          ],
+        },
+        {
+          title: '5. Derechos ARCO y revocación',
+          paragraphs: [
+            'Tienes derecho a Acceder, Rectificar, Cancelar u Oponerte al tratamiento de tus datos (derechos ARCO), así como a revocar el consentimiento otorgado.',
+            'Para ejercer estos derechos, envía una solicitud con identificación oficial a nuestros canales de contacto. Responderemos en un plazo máximo de 20 días hábiles.',
+          ],
+        },
+        {
+          title: '6. Cookies y tecnologías similares',
+          paragraphs: [
+            'Este sitio puede utilizar cookies y almacenamiento local para recordar preferencias (idioma, carrito de compras) y medir el uso del sitio de forma agregada.',
+            'Puedes deshabilitar las cookies desde la configuración de tu navegador; algunas funciones del sitio podrían dejar de estar disponibles.',
+          ],
+        },
+        {
+          title: '7. Cambios al aviso',
+          paragraphs: [
+            'Nos reservamos el derecho de actualizar este Aviso de Privacidad. Publicaremos la versión vigente en esta página con la fecha de última actualización.',
+            'El uso continuado del sitio después de un cambio implica tu conocimiento del aviso actualizado.',
+          ],
+        },
+      ],
+    },
+    terms: {
+      title: 'Términos y Condiciones',
+      updated: 'Última actualización: 6 de julio de 2026',
+      intro: 'Al acceder y utilizar el sitio web de Orita aceptas estos Términos y Condiciones. Si no estás de acuerdo, te pedimos no utilizar nuestros servicios en línea.',
+      sections: [
+        {
+          title: '1. Identidad del prestador',
+          paragraphs: [
+            'El sitio www.drinkorita.com (y dominios asociados) es operado por Orita, marca de refrescos artesanales mexicanos con agave y fruta real, con operaciones en México.',
+          ],
+        },
+        {
+          title: '2. Objeto del sitio',
+          paragraphs: [
+            'Este sitio tiene fines informativos y comerciales: presentar la marca, sus productos y permitir la simulación de compras en línea.',
+            'La tienda en esta versión funciona como demostración: los precios mostrados son referenciales en pesos mexicanos (MXN) y el proceso de pago no genera cargos reales.',
+          ],
+        },
+        {
+          title: '3. Cuenta de usuario',
+          paragraphs: [
+            'El acceso con cuenta es opcional y, en la versión actual, de carácter demostrativo. Eres responsable de mantener la confidencialidad de tus credenciales.',
+            'Orita podrá suspender cuentas que incurran en uso fraudulento, abusivo o contrario a la ley.',
+          ],
+        },
+        {
+          title: '4. Productos, precios y disponibilidad',
+          paragraphs: [
+            'Las imágenes, descripciones y precios pueden variar sin previo aviso. Nos esforzamos por mostrar información precisa sobre ingredientes, presentaciones y valores nutricionales.',
+            'La disponibilidad de productos y zonas de envío depende de la operación comercial vigente al momento de una compra real.',
+          ],
+        },
+        {
+          title: '5. Pedidos y envíos',
+          paragraphs: [
+            'Al confirmar un pedido simulado recibirás un número de rastreo de demostración con formato ORITA-MX-XXXXXX. Los tiempos y costos de envío publicados son estimaciones.',
+            'Para compras reales, aplicarán las políticas de envío, devolución y garantía que se indiquen en el checkout definitivo.',
+          ],
+        },
+        {
+          title: '6. Propiedad intelectual',
+          paragraphs: [
+            'Logotipos, diseños, textos, fotografías, empaques y demás contenidos del sitio son propiedad de Orita o de sus licenciantes. Queda prohibida su reproducción sin autorización escrita.',
+          ],
+        },
+        {
+          title: '7. Limitación de responsabilidad',
+          paragraphs: [
+            'Orita no será responsable por daños indirectos derivados del uso del sitio, interrupciones del servicio, errores en la demostración de compra o enlaces a sitios de terceros.',
+            'El sitio se ofrece “tal cual”; trabajamos para mantenerlo seguro y disponible, sin garantizar ausencia total de errores técnicos.',
+          ],
+        },
+        {
+          title: '8. Ley aplicable y jurisdicción',
+          paragraphs: [
+            'Estos términos se rigen por las leyes de los Estados Unidos Mexicanos. Para cualquier controversia, las partes se someten a los tribunales competentes de la Ciudad de México, renunciando a cualquier otro fuero que pudiera corresponderles.',
+          ],
+        },
+        {
+          title: '9. Contacto',
+          paragraphs: [
+            'Para consultas sobre estos términos utiliza el formulario de contacto del sitio o nuestros canales oficiales en redes sociales.',
+          ],
+        },
+      ],
+    },
   },
 }

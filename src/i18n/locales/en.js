@@ -10,9 +10,38 @@ export default {
     menu: 'Menu',
     close: 'Close menu',
     home: 'Orita home',
-    instagram: 'Instagram',
-    soundOn: 'Enable ambiance',
-    soundOff: 'Mute ambiance',
+    login: 'Sign in',
+    logout: 'Sign out',
+  },
+  auth: {
+    title: 'Your Orita account',
+    subtitle: 'Sign in to save orders and track shipments.',
+    email: 'Email address',
+    password: 'Password',
+    submit: 'Sign in',
+    close: 'Close',
+    demoNote: 'Demo access — full functionality coming soon.',
+    errors: { required: 'Please enter email and password.' },
+  },
+  tracking: {
+    eyebrow: 'Shipping',
+    title: 'Track your order',
+    hint: 'Enter your ORITA-MX-XXXXXX tracking number',
+    placeholder: 'ORITA-MX-…',
+    submit: 'Track',
+    notFound: 'We could not find that number. Please check and try again.',
+    status: {
+      confirmed: 'Order confirmed',
+      preparing: 'Preparing your order',
+      shipped: 'On the way',
+      delivered: 'Delivered',
+    },
+    steps: {
+      confirmed: 'Confirmed',
+      preparing: 'Preparing',
+      shipped: 'In transit',
+      delivered: 'Delivered',
+    },
   },
   hero: {
     eyebrow: 'Agave Pop.',
@@ -189,6 +218,8 @@ export default {
     showSpecs: '+ View specifications',
     hideSpecs: '− Hide details',
     viewCart: 'View cart ({count})',
+    trackOrder: 'Track order',
+    shippingNote: 'Simulated shipping · demo checkout',
     specLabels: {
       pack: 'Pack size',
       volume: 'Volume',
@@ -380,16 +411,165 @@ export default {
     },
     continue: 'Continue',
     close: 'Close',
+    trackingLabel: 'Your tracking number:',
+    trackShipment: 'View shipping status',
   },
   footer: {
     cta: 'Take Orita Home',
     tagline: 'Agave Pop. Made in Mexico. 🇲🇽',
     subtagline: 'Artisan soda with agave, real fruit and sparkling spring water.',
     buy: 'Shop now',
+    about: 'Mexican sodas with agave, real fruit and spring water. Made in Mexico to share.',
+    paymentNote: 'Simulated payments in this demo. No real charges will be made.',
+    madeIn: 'Proudly made in Mexico',
+    trackDiscrete: 'Track shipment',
     rights: '© {year} Orita. All rights reserved.',
+    columns: {
+      shop: 'Shop',
+      explore: 'Explore',
+      legal: 'Legal',
+    },
+    links: {
+      shop: 'Shop',
+      track: 'Track order',
+      cart: 'My cart',
+      story: 'Story',
+      flavors: 'Flavors',
+      map: 'Find us',
+      contact: 'Contact',
+      privacy: 'Privacy',
+      terms: 'Terms',
+      shipping: 'Shipping',
+    },
   },
   meta: {
     title: 'Orita | Agave Pop. Made in Mexico.',
     description: 'Orita — Agave Pop. Artisanal Mexican sodas with mineral water, agave juice and real fruit.',
+  },
+  legal: {
+    eyebrow: 'Legal information',
+    close: 'Close',
+    privacy: {
+      title: 'Privacy Notice',
+      updated: 'Last updated: July 6, 2026',
+      intro: 'At Orita (“we”), based in Mexico, we respect your privacy and protect your personal data in accordance with applicable Mexican data protection law (LFPDPPP) and its regulations.',
+      sections: [
+        {
+          title: '1. Data controller',
+          paragraphs: [
+            'Orita Agave Pop is responsible for the use and protection of personal data collected through this website, contact forms, user accounts and online purchase flows.',
+            'For privacy inquiries, reach us via the site contact section or our official social media channels.',
+          ],
+        },
+        {
+          title: '2. Data we collect',
+          paragraphs: [
+            'We may collect: name, email, phone, shipping address, billing details, order history, language preferences and technical browsing data (IP address, browser type, pages visited).',
+            'In this demo version, checkout and sign-in are simulated; no real payments are processed and no banking data is stored on production servers.',
+          ],
+        },
+        {
+          title: '3. Purposes of processing',
+          paragraphs: [
+            'We use your data to: process orders and shipments; respond to contact requests; improve the site experience; send account or order communications (when applicable); comply with legal obligations; and, with your consent, inform you about Orita news and promotions.',
+            'Marketing purposes require your express consent, which you may withdraw at any time.',
+          ],
+        },
+        {
+          title: '4. Data sharing',
+          paragraphs: [
+            'We may share data with logistics providers, payment gateways, hosting services and analytics tools solely for the purposes described and under confidentiality agreements.',
+            'We do not sell or rent your personal data to third parties for advertising purposes.',
+          ],
+        },
+        {
+          title: '5. ARCO rights and withdrawal',
+          paragraphs: [
+            'You have the right to Access, Rectify, Cancel or Object to the processing of your data (ARCO rights), and to withdraw consent previously granted.',
+            'To exercise these rights, submit a request with official identification through our contact channels. We will respond within 20 business days.',
+          ],
+        },
+        {
+          title: '6. Cookies and similar technologies',
+          paragraphs: [
+            'This site may use cookies and local storage to remember preferences (language, shopping cart) and measure aggregated site usage.',
+            'You may disable cookies in your browser settings; some site features may become unavailable.',
+          ],
+        },
+        {
+          title: '7. Changes to this notice',
+          paragraphs: [
+            'We reserve the right to update this Privacy Notice. The current version will be published on this page with the last updated date.',
+            'Continued use of the site after a change constitutes acknowledgment of the updated notice.',
+          ],
+        },
+      ],
+    },
+    terms: {
+      title: 'Terms and Conditions',
+      updated: 'Last updated: July 6, 2026',
+      intro: 'By accessing and using the Orita website you accept these Terms and Conditions. If you do not agree, please do not use our online services.',
+      sections: [
+        {
+          title: '1. Service provider',
+          paragraphs: [
+            'The website www.drinkorita.com (and associated domains) is operated by Orita, a brand of artisanal Mexican sodas with agave and real fruit, with operations in Mexico.',
+          ],
+        },
+        {
+          title: '2. Purpose of the site',
+          paragraphs: [
+            'This site is for informational and commercial purposes: presenting the brand, its products and enabling simulated online purchases.',
+            'The store in this version works as a demonstration: displayed prices are reference prices in Mexican pesos (MXN) and the payment flow does not generate real charges.',
+          ],
+        },
+        {
+          title: '3. User account',
+          paragraphs: [
+            'Account access is optional and, in the current version, demonstrative in nature. You are responsible for keeping your credentials confidential.',
+            'Orita may suspend accounts involved in fraudulent, abusive or unlawful use.',
+          ],
+        },
+        {
+          title: '4. Products, pricing and availability',
+          paragraphs: [
+            'Images, descriptions and prices may change without prior notice. We strive to display accurate information about ingredients, packaging and nutritional values.',
+            'Product availability and shipping zones depend on commercial operations at the time of a real purchase.',
+          ],
+        },
+        {
+          title: '5. Orders and shipping',
+          paragraphs: [
+            'When confirming a simulated order you will receive a demo tracking number in the format ORITA-MX-XXXXXX. Published shipping times and costs are estimates.',
+            'For real purchases, shipping, return and warranty policies stated at final checkout will apply.',
+          ],
+        },
+        {
+          title: '6. Intellectual property',
+          paragraphs: [
+            'Logos, designs, text, photographs, packaging and other site content are owned by Orita or its licensors. Reproduction without written authorization is prohibited.',
+          ],
+        },
+        {
+          title: '7. Limitation of liability',
+          paragraphs: [
+            'Orita shall not be liable for indirect damages arising from site use, service interruptions, purchase demo errors or links to third-party sites.',
+            'The site is provided “as is”; we work to keep it secure and available without guaranteeing complete absence of technical errors.',
+          ],
+        },
+        {
+          title: '8. Governing law and jurisdiction',
+          paragraphs: [
+            'These terms are governed by the laws of Mexico. Any dispute shall be submitted to the competent courts of Mexico City, waiving any other jurisdiction that may apply.',
+          ],
+        },
+        {
+          title: '9. Contact',
+          paragraphs: [
+            'For questions about these terms, use the site contact form or our official social media channels.',
+          ],
+        },
+      ],
+    },
   },
 }

@@ -1,17 +1,20 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useContactForm } from '../../composables/useContactForm'
 import { scrollTo } from '../../composables/useLenis'
-import BeachDecor from '../tropical/BeachDecor.vue'
+import { useSectionLife } from '../../composables/useSectionLife'
 
 const { t } = useI18n()
+const sectionRef = ref(null)
 
 const {
   form, errors, touched, submitted, isValid,
   onNameInput, onEmailInput, onPhoneInput, onMessageInput, onBlur, submit,
   NAME_MAX, EMAIL_MAX, PHONE_MAX, MESSAGE_MAX,
 } = useContactForm()
+
+useSectionLife(sectionRef)
 
 const channels = computed(() => [
   { icon: '/images/instagram.png', label: 'Instagram', value: '@drinkorita', href: 'https://www.instagram.com/drinkorita/', external: true },
@@ -38,9 +41,8 @@ function onChannelClick(ch) {
 </script>
 
 <template>
-  <section id="contact" data-nav-contrast="dark" class="relative overflow-hidden bg-[#2A7A72] py-24 text-white md:py-32">
-    <BeachDecor />
-    <div class="tropical-grain pointer-events-none absolute inset-0 opacity-[0.04]" aria-hidden="true" />
+  <section id="contact" ref="sectionRef" data-nav-contrast="dark" class="section-green relative overflow-hidden py-24 md:py-32">
+    <div class="tropical-grain pointer-events-none absolute inset-0 opacity-[0.03]" aria-hidden="true" />
 
     <div class="content-layer mx-auto max-w-6xl px-5 md:px-8">
       <header class="mb-12 text-center md:mb-16">
@@ -54,7 +56,7 @@ function onChannelClick(ch) {
 
       <div class="grid gap-10 lg:grid-cols-5 lg:gap-14">
         <div class="space-y-6 lg:col-span-2">
-          <div class="rounded-3xl bg-white/10 p-6 backdrop-blur-sm md:p-8">
+          <div class="glass-ice rounded-3xl p-6 md:p-8" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2);">
             <h3 class="mb-4 font-display text-xl font-bold">{{ t('contact.infoTitle') }}</h3>
             <p class="mb-6 font-body text-sm leading-relaxed text-white/75">{{ t('contact.infoText') }}</p>
             <ul class="space-y-3">
@@ -64,7 +66,7 @@ function onChannelClick(ch) {
                   :href="ch.href"
                   target="_blank"
                   rel="noopener"
-                  class="group flex items-center gap-4 rounded-2xl bg-white/8 p-4 transition-all hover:bg-white/15"
+                  class="group flex items-center gap-4 rounded-2xl bg-white/8 p-4 transition-all hover:bg-white/15 life-float"
                 >
                   <img :src="ch.icon" alt="" class="h-5 w-5 brightness-0 invert opacity-80" />
                   <div>
@@ -76,7 +78,7 @@ function onChannelClick(ch) {
                 <button
                   v-else
                   type="button"
-                  class="group flex w-full items-center gap-4 rounded-2xl bg-white/8 p-4 text-left transition-all hover:bg-white/15"
+                  class="group flex w-full items-center gap-4 rounded-2xl bg-white/8 p-4 text-left transition-all hover:bg-white/15 life-float"
                   @click="onChannelClick(ch)"
                 >
                   <img :src="ch.icon" alt="" class="h-5 w-5 brightness-0 invert opacity-80" />
@@ -91,7 +93,7 @@ function onChannelClick(ch) {
           </div>
         </div>
 
-        <form class="lg:col-span-3 space-y-5 rounded-3xl bg-[#F7F0E3] p-6 text-[#2A2018] shadow-xl md:p-10" novalidate @submit="handleSubmit">
+        <form class="glass-ice lg:col-span-3 space-y-5 rounded-3xl p-6 text-[#2A2018] shadow-xl md:p-10" novalidate @submit="handleSubmit">
           <h3 class="font-display text-xl font-bold md:text-2xl">{{ t('contact.formTitle') }}</h3>
 
           <div>
@@ -125,7 +127,7 @@ function onChannelClick(ch) {
             </div>
           </div>
 
-          <button type="submit" class="w-full rounded-full py-4 font-display text-base font-bold transition-all" :class="isValid ? 'bg-[#2A7A72] text-white hover:scale-[1.02] shadow-md' : 'cursor-not-allowed bg-[#2A2018]/15 text-[#2A2018]/40'" :disabled="!isValid">
+          <button type="submit" class="magnetic-btn w-full rounded-full py-4 font-display text-base font-bold transition-all" :class="isValid ? 'bg-[#2A7A72] text-white hover:scale-[1.02] shadow-md' : 'cursor-not-allowed bg-[#2A2018]/15 text-[#2A2018]/40'" :disabled="!isValid">
             {{ t('contact.submit') }}
           </button>
 

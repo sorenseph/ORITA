@@ -3,7 +3,10 @@ import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useInstagram } from '../../composables/useInstagram'
 import { gsap } from '../../composables/useLenis'
+import { useSectionLife } from '../../composables/useSectionLife'
 import BeachDecor from '../tropical/BeachDecor.vue'
+import SectionAmbient from '../atmosphere/SectionAmbient.vue'
+import SmallLeaves from '../tropical/SmallLeaves.vue'
 
 const { t, locale } = useI18n()
 const { displayPosts, loading, fromApi, reload } = useInstagram()
@@ -13,6 +16,8 @@ const hoveredId = ref(null)
 watch(locale, () => {
   if (!fromApi.value) reload()
 })
+
+useSectionLife(sectionRef)
 
 onMounted(() => {
   gsap.from('.ig-heading', { y: 60, opacity: 0, duration: 1, scrollTrigger: { trigger: sectionRef.value, start: 'top 80%' } })
@@ -25,6 +30,8 @@ onMounted(() => {
 
 <template>
   <section id="instagram" ref="sectionRef" data-nav-contrast="light" class="relative overflow-hidden py-24 md:py-40">
+    <SectionAmbient variant="sand" :intensity="0.3" :show-bubbles="false" />
+    <SmallLeaves />
     <BeachDecor light />
     <div class="relative z-10 mx-auto max-w-7xl px-5 md:px-8">
       <div class="ig-heading mb-12 flex flex-col items-start justify-between gap-4 md:mb-16 md:flex-row md:items-end">
@@ -36,7 +43,7 @@ onMounted(() => {
           <p class="mt-4 max-w-md font-body text-base text-[#2A2018]/60">{{ t('instagram.intro') }}</p>
           <p v-if="loading" class="mt-2 font-body text-sm text-[#2A2018]/40">{{ t('instagram.loading') }}</p>
         </div>
-        <a href="https://www.instagram.com/drinkorita/" target="_blank" rel="noopener" class="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-body text-sm text-[#2A2018]/70 shadow-sm transition-all hover:text-[#2A2018] hover:shadow-md">
+        <a href="https://www.instagram.com/drinkorita/" target="_blank" rel="noopener" class="magnetic-btn flex items-center gap-2 rounded-full glass-ice px-5 py-2.5 font-body text-sm text-[#2A2018]/70 transition-all hover:text-[#2A2018]">
           <img src="/images/instagram.png" alt="" class="h-4 w-4 opacity-70" />
           @drinkorita
         </a>
@@ -49,7 +56,7 @@ onMounted(() => {
           :href="post.permalink || 'https://www.instagram.com/drinkorita/'"
           target="_blank"
           rel="noopener"
-          class="ig-item group relative overflow-hidden rounded-2xl shadow-md"
+          class="ig-item life-float group relative overflow-hidden rounded-2xl shadow-md"
           :class="(post.large || i === 0) ? 'col-span-2 row-span-2 aspect-square' : 'aspect-square'"
           @mouseenter="hoveredId = post.id"
           @mouseleave="hoveredId = null"

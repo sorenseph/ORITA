@@ -9,6 +9,8 @@ import FluidMorphBg from '../ui/FluidMorphBg.vue'
 import BeachDecor from '../tropical/BeachDecor.vue'
 import SmallLeaves from '../tropical/SmallLeaves.vue'
 import TropicalSplash from '../tropical/TropicalSplash.vue'
+import SectionAmbient from '../atmosphere/SectionAmbient.vue'
+import { useSectionLife } from '../../composables/useSectionLife'
 
 const { t } = useI18n()
 const storySteps = useLocalizedStorySteps()
@@ -38,6 +40,7 @@ watch(activeStep, () => {
 })
 
 useMotionReveal(sectionRef, '.motion-reveal', { stagger: 0.06 })
+useSectionLife(sectionRef)
 
 onMounted(() => {
   autoplayRef.value = setInterval(() => { if (!isPaused.value) nextStep() }, 4500)
@@ -48,6 +51,7 @@ onUnmounted(() => { if (autoplayRef.value) clearInterval(autoplayRef.value) })
 <template>
   <section id="story" ref="sectionRef" class="relative">
     <div class="story-brand relative overflow-hidden bg-[#3BBFA3] px-5 py-20 md:px-8 md:py-28" data-nav-contrast="dark">
+      <SectionAmbient variant="tropical" :intensity="0.5" />
       <TropicalSplash color="#F7F0E3" flip simple />
       <BeachDecor minimal />
       <div class="content-layer mx-auto max-w-3xl text-center">
@@ -61,6 +65,7 @@ onUnmounted(() => { if (autoplayRef.value) clearInterval(autoplayRef.value) })
     </div>
 
     <div class="relative py-20 md:py-32" data-nav-contrast="light">
+      <SectionAmbient variant="sand" :intensity="0.35" :show-bubbles="false" />
       <SmallLeaves />
       <div class="content-layer mx-auto max-w-6xl px-5 md:px-8">
         <div class="motion-reveal mb-12 text-center md:mb-16">
@@ -74,7 +79,7 @@ onUnmounted(() => { if (autoplayRef.value) clearInterval(autoplayRef.value) })
         <div class="story-timeline motion-reveal" @mouseenter="isPaused = true" @mouseleave="isPaused = false">
           <div
             ref="stepCardRef"
-            class="mx-auto mb-10 max-w-2xl overflow-hidden rounded-3xl bg-white shadow-[0_16px_48px_rgba(42,32,24,0.1)]"
+            class="mx-auto mb-10 max-w-2xl overflow-hidden rounded-3xl glass-ice shadow-[0_16px_48px_rgba(42,32,24,0.1)] life-breathe"
             :style="{ borderTop: `4px solid ${storySteps[activeStep]?.color}` }"
           >
             <div class="flex flex-col items-center p-8 md:flex-row md:gap-10 md:p-12">
@@ -150,11 +155,14 @@ onUnmounted(() => { if (autoplayRef.value) clearInterval(autoplayRef.value) })
               </h2>
               <p class="mt-4 max-w-xl font-body text-white/60 md:text-lg">{{ t('lab.intro') }}</p>
             </div>
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div
+              class="peek-carousel -mx-5 hide-scrollbar md:mx-0 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3"
+              data-lenis-prevent
+            >
               <div
                 v-for="(ing, i) in labIngredients"
                 :key="ing.id"
-                class="motion-reveal group cursor-pointer rounded-2xl bg-white/10 p-6 backdrop-blur-sm transition-shadow md:p-7"
+                class="peek-carousel__card motion-reveal group cursor-pointer rounded-2xl glass-ice p-5 transition-shadow md:p-7"
                 :style="{ boxShadow: hoveredId === ing.id ? `0 12px 40px ${ing.color}25` : 'none' }"
                 @mouseenter="onCardEnter(ing.id, $event)"
                 @mouseleave="onCardLeave($event)"
@@ -164,9 +172,10 @@ onUnmounted(() => { if (autoplayRef.value) clearInterval(autoplayRef.value) })
                 </div>
                 <h3 class="mb-2 font-display text-lg font-bold text-white">{{ ing.name }}</h3>
                 <p class="font-body text-sm text-white/70">{{ ing.benefit }}</p>
-                <p class="mt-2 font-body text-xs text-white/50">{{ ing.detail }}</p>
+                <p class="mt-2 line-clamp-2 font-body text-xs text-white/50">{{ ing.detail }}</p>
               </div>
             </div>
+            <p class="mt-3 text-center font-body text-[11px] tracking-wide text-white/35 md:hidden">{{ t('lab.swipeHint') }}</p>
           </div>
         </div>
       </div>

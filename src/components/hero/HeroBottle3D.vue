@@ -3,6 +3,8 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useMouse } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useThemeStore } from '../../stores/theme'
+import { getAtmosphere } from '../../data/atmosphere'
+import { hexToRgb } from '../../utils/color'
 
 const props = defineProps({
   modelUrl: { type: String, default: '/models/orita-bottle.glb' },
@@ -22,6 +24,9 @@ let model = null
 let animationId = null
 let THREE = null
 let resizeObserver = null
+let keyLight = null
+let fillLight = null
+let ambientLight = null
 
 function getMouseOffset() {
   const cx = typeof window !== 'undefined' ? window.innerWidth / 2 : 0
@@ -61,7 +66,11 @@ async function init() {
   fill.position.set(-4, 1, 2)
   const rim = new THREE.DirectionalLight(0xffffff, 0.6)
   rim.position.set(0, 2, -3)
+  ambientLight = ambient
+  keyLight = key
+  fillLight = fill
   scene.add(ambient, key, fill, rim)
+  applyFlavorLights(activeFlavor.value.id)
 
   const loader = new GLTFLoader()
   loader.load(
@@ -74,6 +83,7 @@ async function init() {
       const maxDim = Math.max(size.x, size.y, size.z)
       const scale = 2.4 / maxDim
       model.scale.setScalar(scale)
+      model.userData.baseScale = scale
       model.position.sub(center.multiplyScalar(scale))
       model.position.y -= 0.15
       scene.add(model)
@@ -91,6 +101,15 @@ async function init() {
   resizeObserver.observe(el)
 }
 
+function applyFlavorLights(flavorId) {
+  if (!THREE || !keyLight) return
+  const atmo = getAtmosphere(flavorId)
+  const rgb = hexToRgb(atmo.lightColor)
+  const color = new THREE.Color(rgb.r / 255, rgb.g / 255, rgb.b / 255)
+  keyLight.color.copy(color)
+  fillLight.color.setRGB(color.r * 0.7, color.g * 0.85, color.b)
+}
+
 function animate() {
   animationId = requestAnimationFrame(animate)
   if (!model || !renderer) return
@@ -98,9 +117,12 @@ function animate() {
   const t = performance.now() * 0.001
   const { dx, dy } = getMouseOffset()
 
-  model.rotation.y = dx * 0.55 + t * 0.18
-  model.rotation.x = -dy * 0.18 + Math.sin(t * 0.9) * 0.04
-  model.position.y = Math.sin(t * 1.1) * 0.06 - props.scrollProgress * 0.15
+  model.rotation.y = dx * 0.65 + Math.sin(t * 0.12) * 0.08
+  model.rotation.x = -dy * 0.22 + Math.sin(t * 0.85) * 0.05
+  model.rotation.z = Math.sin(t * 0.4) * 0.02
+  const baseScale = model.userData.baseScale || 1
+  model.position.y = Math.sin(t * 0.7) * 0.08 + Math.cos(t * 0.45) * 0.03 - props.scrollProgress * 0.15
+  model.scale.setScalar(baseScale * (1 + Math.sin(t * 0.55) * 0.012))
 
   renderer.render(scene, camera)
 }
@@ -117,6 +139,7 @@ function onResize() {
 }
 
 watch(() => props.scrollProgress, () => {})
+watch(activeFlavor, (f) => applyFlavorLights(f.id))
 
 onMounted(init)
 

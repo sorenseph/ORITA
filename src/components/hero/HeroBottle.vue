@@ -4,6 +4,8 @@ import { useWindowSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useThemeStore } from '../../stores/theme'
 import { useLocalizedFlavors } from '../../composables/useLocalizedContent'
+import { useOrganicMotion } from '../../composables/useOrganicMotion'
+import { useMouseDepth } from '../../composables/useMouseDepth'
 import HeroBottle3D from './HeroBottle3D.vue'
 import gsap from 'gsap'
 
@@ -15,6 +17,8 @@ const theme = useThemeStore()
 const { activeFlavorIndex, activeFlavor } = storeToRefs(theme)
 const localizedFlavors = useLocalizedFlavors()
 const { width } = useWindowSize()
+const { parallax, mx, my } = useMouseDepth()
+const { float, breathe, sway, killAll } = useOrganicMotion()
 
 const parallaxRef = ref(null)
 const floatRef = ref(null)
@@ -28,15 +32,19 @@ const isMobile = computed(() => width.value < 768)
 const current = computed(() => localizedFlavors.value[activeFlavorIndex.value])
 
 const parallaxStyle = computed(() => {
-  if (isMobile.value) return { transform: 'none' }
-  const cx = width.value / 2
-  const cy = typeof window !== 'undefined' ? window.innerHeight / 2 : 0
-  return {
-    transform: `translate3d(0, ${-props.scrollProgress * 20}px, 0)`,
-  }
+  const scrollY = isMobile.value ? 0 : -props.scrollProgress * 24
+  const depth = parallax(1.2)
+  const transform = depth.transform === 'none'
+    ? `translate3d(0, ${scrollY}px, 0)`
+    : `${depth.transform} translate3d(0, ${scrollY}px, 0)`
+  return { transform }
 })
 
-let floatTween = null
+const glowStyle = computed(() => ({
+  background: `radial-gradient(ellipse 75% 65% at ${50 + mx.value * 8}% ${58 + my.value * 5}%, ${activeFlavor.value.primary}45, transparent 72%)`,
+  transform: parallax(0.4).transform,
+}))
+
 let transitionTween = null
 let ready = false
 
@@ -67,34 +75,30 @@ function playFlavorTransition() {
 
   transitionTween = gsap.timeline()
   transitionTween
-    .fromTo(backRef.value, { x: -fromX, rotation: rest.back.rotation - 6, opacity: 0 }, { ...rest.back, duration: 0.5, ease: 'power3.out' })
-    .fromTo(frontRef.value, { x: fromX, rotation: rest.front.rotation + 6, opacity: 0 }, { ...rest.front, duration: 0.5, ease: 'power3.out' }, '<0.05')
+    .fromTo(backRef.value, { x: -fromX, rotation: rest.back.rotation - 8, opacity: 0 }, { ...rest.back, duration: 0.85, ease: 'power3.out' })
+    .fromTo(frontRef.value, { x: fromX, rotation: rest.front.rotation + 8, opacity: 0 }, { ...rest.front, duration: 0.85, ease: 'power3.out' }, '<0.06')
 
   if (backMirrorRef.value) {
-    transitionTween.fromTo(backMirrorRef.value, { x: -fromX, opacity: 0 }, { ...rest.back, opacity: rest.back.opacity * 0.4, duration: 0.5, ease: 'power3.out' }, '<')
+    transitionTween.fromTo(backMirrorRef.value, { x: -fromX, opacity: 0 }, { ...rest.back, opacity: rest.back.opacity * 0.4, duration: 0.85, ease: 'power3.out' }, '<')
   }
   if (frontMirrorRef.value) {
-    transitionTween.fromTo(frontMirrorRef.value, { x: fromX, opacity: 0 }, { ...rest.front, opacity: rest.front.opacity * 0.35, duration: 0.5, ease: 'power3.out' }, '<0.05')
+    transitionTween.fromTo(frontMirrorRef.value, { x: fromX, opacity: 0 }, { ...rest.front, opacity: rest.front.opacity * 0.35, duration: 0.85, ease: 'power3.out' }, '<0.06')
   }
+}
+
+function startOrganicMotion() {
+  killAll()
 }
 
 onMounted(() => {
   setBottleRest()
-  if (floatRef.value) {
-    floatTween = gsap.to(floatRef.value, {
-      y: isMobile.value ? -5 : -8,
-      duration: isMobile.value ? 3.2 : 3.8,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
-    })
-  }
+  startOrganicMotion()
   ready = true
 })
 
 onUnmounted(() => {
-  floatTween?.kill()
   transitionTween?.kill()
+  killAll()
 })
 
 watch(activeFlavorIndex, (n, o) => {
@@ -103,17 +107,8 @@ watch(activeFlavorIndex, (n, o) => {
 })
 
 watch(isMobile, () => {
-  floatTween?.kill()
   setBottleRest()
-  if (floatRef.value) {
-    floatTween = gsap.to(floatRef.value, {
-      y: isMobile.value ? -5 : -8,
-      duration: isMobile.value ? 3.2 : 3.8,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
-    })
-  }
+  startOrganicMotion()
 })
 </script>
 
@@ -123,9 +118,9 @@ watch(isMobile, () => {
     :class="isMobile ? 'hero-bottle--mobile' : ''"
   >
     <div
-      class="pointer-events-none absolute inset-0 z-0 opacity-25 md:opacity-50"
+      class="pointer-events-none absolute inset-0 z-0 opacity-30 md:opacity-55"
       aria-hidden="true"
-      :style="{ background: `radial-gradient(ellipse 70% 60% at 50% 58%, ${activeFlavor.primary}35, transparent 72%)` }"
+      :style="glowStyle"
     />
 
     <div

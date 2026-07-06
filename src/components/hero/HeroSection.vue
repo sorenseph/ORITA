@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
@@ -8,25 +8,34 @@ import { useLocalizedFlavors } from '../../composables/useLocalizedContent'
 import { gsap, ScrollTrigger, scrollTo } from '../../composables/useLenis'
 import { useCartStore } from '../../stores/cart'
 import { getPackIdForFlavor, productVisuals } from '../../data/content'
+import { getAtmosphere } from '../../data/atmosphere'
+import { magneticButton } from '../../composables/useAnimations'
+import { useCustomCursor } from '../../composables/useCustomCursor'
 import HeroBottle from './HeroBottle.vue'
 import HeroCollage from './HeroCollage.vue'
-import TropicalFoliage from '../tropical/TropicalFoliage.vue'
 import TropicalSplash from '../tropical/TropicalSplash.vue'
+import AtmosphereStack from '../atmosphere/AtmosphereStack.vue'
+import { socialLinks } from '../../data/socials'
 
 const { t } = useI18n()
 const cart = useCartStore()
 const theme = useThemeStore()
 const { activeFlavor, activeFlavorIndex } = storeToRefs(theme)
 const flavors = useLocalizedFlavors()
+const { setMode } = useCustomCursor()
 
 const sectionRef = ref(null)
+const headlineRef = ref(null)
+const headlineTextRef = ref(null)
 const scrollProgress = ref(0)
 const autoplayTimer = ref(null)
 const isPaused = ref(false)
+const ctaRefs = ref([])
 const { width } = useWindowSize()
 const isMobile = computed(() => width.value < 768)
 
 const currentFlavor = computed(() => flavors.value[activeFlavorIndex.value])
+const atmo = computed(() => getAtmosphere(activeFlavor.value.id))
 const editorialLine = computed(() => t(`hero.taglines.${activeFlavor.value.id}`))
 const duoLine = computed(() => {
   const key = activeFlavor.value.id
@@ -47,8 +56,48 @@ const bodyText = computed(() =>
 )
 const primaryText = computed(() => (isDarkText.value ? '#2A2018' : '#fff'))
 
+let magneticCleanups = []
+let headlineTween = null
+
 function addToCart() {
   cart.addItem(getPackIdForFlavor(activeFlavor.value.id), 1, true)
+}
+
+function animateHeadline() {
+  const el = headlineRef.value
+  if (!el) return
+  headlineTween?.kill()
+
+  const text = editorialLine.value
+  el.innerHTML = ''
+  el.setAttribute('aria-label', text)
+
+  ;[...text].forEach((char, i) => {
+    const span = document.createElement('span')
+    span.className = 'split-char inline-block'
+    span.textContent = char === ' ' ? '\u00A0' : char
+    span.style.opacity = '0'
+    span.style.transform = 'translateY(100%) rotate(6deg)'
+    el.appendChild(span)
+
+    gsap.to(span, {
+      opacity: 1,
+      y: 0,
+      rotation: 0,
+      duration: 0.55,
+      delay: i * 0.035,
+      ease: 'back.out(1.35)',
+    })
+
+    gsap.to(span, {
+      y: -2,
+      duration: 2.2 + (i % 4) * 0.15,
+      delay: 0.5 + i * 0.035,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    })
+  })
 }
 
 function goToFlavor(index) {
@@ -61,32 +110,55 @@ function nextFlavor() {
   animateHeadline()
 }
 
-function animateHeadline() {
-  document.querySelectorAll('.hero-headline').forEach((el) => {
-    gsap.fromTo(el, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' })
-  })
+function setCtaRef(el) {
+  if (el && !ctaRefs.value.includes(el)) ctaRefs.value.push(el)
 }
 
-onMounted(() => {
+function onBottleEnter() {
+  setMode('flavor', activeFlavor.value.emoji || atmo.value.mood)
+}
+
+function onBottleLeave() {
+  setMode('default')
+}
+
+function onBtnEnter() {
+  setMode('liquid')
+}
+
+function onBtnLeave() {
+  setMode('default')
+}
+
+onMounted(async () => {
   gsap.from('.hero-copy > *', {
-    y: 20, opacity: 0, duration: 0.8, stagger: 0.06, delay: 0.1, ease: 'power3.out', clearProps: 'all',
+    y: 24, opacity: 0, duration: 1, stagger: 0.08, delay: 0.15, ease: 'power3.out', clearProps: 'opacity',
   })
 
   ScrollTrigger.create({
     trigger: sectionRef.value,
     start: 'top top',
     end: 'bottom top',
-    scrub: 0.4,
+    scrub: 0.6,
     onUpdate: (self) => { scrollProgress.value = self.progress },
   })
 
   autoplayTimer.value = setInterval(() => {
     if (!isPaused.value) nextFlavor()
-  }, 5500)
+  }, 7000)
+
+  await nextTick()
+  animateHeadline()
+
+  magneticCleanups = ctaRefs.value.map((btn) => magneticButton(btn)).filter(Boolean)
 })
+
+watch(editorialLine, () => nextTick(animateHeadline))
 
 onUnmounted(() => {
   if (autoplayTimer.value) clearInterval(autoplayTimer.value)
+  headlineTween?.kill()
+  magneticCleanups.forEach((fn) => fn?.())
 })
 </script>
 
@@ -95,31 +167,43 @@ onUnmounted(() => {
     id="hero"
     ref="sectionRef"
     data-nav-contrast="auto"
-    class="relative h-screen min-h-[600px]"
+    class="hero-section relative h-screen min-h-[600px]"
     @mouseenter="isPaused = true"
     @mouseleave="isPaused = false"
   >
-    <div
-      class="sticky top-0 flex h-[100svh] min-h-[600px] w-full flex-col overflow-hidden transition-colors duration-700 ease-out"
-      :style="{ backgroundColor: activeFlavor.bgColor }"
-    >
-      <TropicalFoliage :compact="isMobile" :scroll-progress="scrollProgress" />
-      <HeroCollage :scroll-progress="scrollProgress" />
-      <div class="tropical-grain pointer-events-none absolute inset-0 opacity-[0.03] md:opacity-[0.05]" aria-hidden="true" />
+    <div class="sticky top-0 flex h-[100svh] min-h-[600px] w-full flex-col overflow-hidden">
+      <AtmosphereStack :scroll-progress="scrollProgress" />
 
       <div
-        class="hero-layout content-layer relative mx-auto grid h-full min-h-0 w-full max-w-7xl
+        class="flavor-tint pointer-events-none absolute inset-0 z-[1] transition-opacity duration-[2000ms]"
+        :style="{
+          backgroundColor: activeFlavor.bgColor,
+          opacity: 0.12,
+          boxShadow: `inset 0 0 120px 40px ${atmo.glow}`,
+        }"
+      />
+
+      <HeroCollage :scroll-progress="scrollProgress" />
+      <div class="tropical-grain pointer-events-none absolute inset-0 z-[6] opacity-[0.025] md:opacity-[0.04]" aria-hidden="true" />
+
+      <div
+        class="hero-layout content-layer relative z-10 mx-auto grid h-full min-h-0 w-full max-w-7xl
           grid-rows-[minmax(0,1.2fr)_auto]
           gap-0 px-4 pb-[5rem] pt-[4.5rem]
           md:grid-cols-2 md:grid-rows-1 md:items-center md:gap-8 md:px-10 md:pb-[7rem] md:pt-[5.5rem] lg:gap-10"
       >
-        <div class="hero-visual order-1 flex min-h-0 items-end justify-center self-stretch md:order-2 md:items-center">
+        <div
+          class="hero-visual order-1 flex min-h-0 items-end justify-center self-stretch md:order-2 md:items-center"
+          data-cursor-zone="bottle"
+          @mouseenter="onBottleEnter"
+          @mouseleave="onBottleLeave"
+        >
           <HeroBottle :scroll-progress="scrollProgress" />
         </div>
 
         <div class="hero-copy order-2 flex min-h-0 flex-col justify-end pb-1 md:order-1 md:justify-center md:pb-0">
           <p
-            class="mb-0.5 font-body text-[10px] font-medium tracking-[0.32em] uppercase md:mb-2 md:text-sm"
+            class="hero-eyebrow mb-0.5 font-body text-[10px] font-medium tracking-[0.32em] uppercase md:mb-2 md:text-sm"
             :style="{ color: mutedText }"
           >
             {{ t('hero.eyebrow') }}
@@ -153,11 +237,11 @@ onUnmounted(() => {
           </p>
 
           <p
+            ref="headlineRef"
             class="hero-headline mt-0.5 font-editorial text-[clamp(1.05rem,4.2vw,1.35rem)] leading-[1.2] tracking-tight md:mt-4 md:text-[clamp(1.35rem,4.2vw,2.4rem)] md:leading-[1.12]"
             :style="{ color: primaryText }"
-          >
-            {{ editorialLine }}
-          </p>
+          />
+          <span ref="headlineTextRef" class="sr-only">{{ editorialLine }}</span>
 
           <p
             class="mt-1 hidden max-w-md font-body text-base leading-relaxed md:mt-3 md:block"
@@ -168,23 +252,32 @@ onUnmounted(() => {
 
           <div class="mt-2.5 grid grid-cols-2 gap-2 md:mt-6 md:flex md:flex-wrap md:items-center md:gap-2.5">
             <button
-              class="group flex items-center justify-center gap-1.5 rounded-full px-3 py-2 font-display text-[11px] font-bold shadow-lg transition-all active:scale-[0.98] md:px-5 md:py-2.5 md:text-sm md:hover:scale-105"
+              :ref="setCtaRef"
+              class="magnetic-btn group flex items-center justify-center gap-1.5 rounded-full px-3 py-2 font-display text-[11px] font-bold shadow-lg transition-all active:scale-[0.98] md:px-5 md:py-2.5 md:text-sm"
               :class="isDarkText ? 'bg-[#2A2018] text-white' : 'bg-white text-[#2A2018]'"
+              @mouseenter="onBtnEnter"
+              @mouseleave="onBtnLeave"
               @click="scrollTo('#story', { offset: -96 })"
             >
               {{ t('hero.cta') }}
               <span class="hidden transition-transform group-hover:translate-x-1 md:inline">→</span>
             </button>
             <button
-              class="flex items-center justify-center rounded-full bg-[#2A7A72] px-3 py-2 font-display text-[11px] font-bold text-white shadow-md transition-all active:scale-[0.98] md:px-4 md:py-2.5 md:text-sm md:hover:scale-105"
+              :ref="setCtaRef"
+              class="magnetic-btn flex items-center justify-center rounded-full bg-[#2A7A72] px-3 py-2 font-display text-[11px] font-bold text-white shadow-md transition-all active:scale-[0.98] md:px-4 md:py-2.5 md:text-sm"
+              @mouseenter="onBtnEnter"
+              @mouseleave="onBtnLeave"
               @click="addToCart"
             >
               <span class="md:hidden">{{ t('hero.addShort', { price: packPrice }) }}</span>
               <span class="hidden md:inline">{{ t('flavors.addToCart', { price: packPrice }) }}</span>
             </button>
             <button
-              class="col-span-2 hidden rounded-full border px-4 py-2 font-display text-xs font-semibold transition-all hover:scale-105 md:col-span-1 md:inline-flex md:py-2.5 md:text-sm"
+              :ref="setCtaRef"
+              class="magnetic-btn col-span-2 hidden rounded-full border px-4 py-2 font-display text-xs font-semibold transition-all md:col-span-1 md:inline-flex md:py-2.5 md:text-sm"
               :class="isDarkText ? 'border-[#2A2018]/25 text-[#2A2018]' : 'border-white/40 text-white hover:bg-white/10'"
+              @mouseenter="onBtnEnter"
+              @mouseleave="onBtnLeave"
               @click="scrollTo('#flavors', { offset: -96 })"
             >
               {{ t('hero.exploreFlavors') }}
@@ -195,8 +288,8 @@ onUnmounted(() => {
             <button
               v-for="(flavor, idx) in flavors"
               :key="flavor.id"
-              class="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-300"
-              :class="idx === activeFlavorIndex ? 'scale-105 bg-white shadow-md' : 'bg-white/20 hover:bg-white/30'"
+              class="glass-ice flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-500"
+              :class="idx === activeFlavorIndex ? 'scale-105 shadow-md' : 'opacity-80 hover:opacity-100'"
               @click="goToFlavor(idx)"
             >
               <img :src="flavor.ingredients[0]?.img" alt="" class="h-5 w-5 object-contain" />
@@ -214,7 +307,7 @@ onUnmounted(() => {
               <button
                 v-for="(flavor, idx) in flavors"
                 :key="`dot-${flavor.id}`"
-                class="rounded-full border-2 transition-all duration-300"
+                class="rounded-full border-2 transition-all duration-500"
                 :class="idx === activeFlavorIndex ? 'h-2.5 w-2.5 scale-110 border-[#4AAB9E] md:h-3 md:w-3' : 'h-1.5 w-1.5 opacity-70 md:h-2 md:w-2'"
                 :style="{
                   background: idx === activeFlavorIndex ? flavor.bgColor : `${flavor.bgColor}88`,
@@ -235,13 +328,29 @@ onUnmounted(() => {
         </div>
       </div>
 
+      <div class="absolute bottom-[5rem] left-3 z-30 hidden md:left-10 md:block">
+        <div class="flex flex-col gap-2.5">
+          <a
+            v-for="s in socialLinks"
+            :key="s.label"
+            :href="s.href"
+            target="_blank"
+            rel="noopener"
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 opacity-50 backdrop-blur-sm transition-opacity hover:opacity-90"
+            :aria-label="s.label"
+          >
+            <img :src="s.icon" alt="" class="h-3.5 w-3.5 brightness-0 invert" />
+          </a>
+        </div>
+      </div>
+
       <div class="absolute bottom-[5rem] right-3 z-30 hidden items-end gap-2 sm:flex md:bottom-[5.5rem] md:right-10 md:gap-4">
         <div
           class="hidden flex-col items-center gap-0.5 font-body text-xs tracking-widest uppercase md:flex"
           :class="isDarkText ? 'text-[#2A2018]/50' : 'text-white/60'"
         >
           <span>{{ t('hero.scroll') }}</span>
-          <span class="animate-bounce">↓</span>
+          <span class="scroll-hint">↓</span>
         </div>
         <img
           src="/images/medals.png"
@@ -285,11 +394,27 @@ onUnmounted(() => {
 
 .title-fade-enter-active,
 .title-fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .title-fade-enter-from,
 .title-fade-leave-to {
   opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+.scroll-hint {
+  opacity: 0.7;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 </style>

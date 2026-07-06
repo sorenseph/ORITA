@@ -42,12 +42,43 @@ export function useLenis() {
 }
 
 export function scrollTo(target, options = {}) {
-  if (lenisInstance) {
-    lenisInstance.scrollTo(target, options)
-  } else {
-    const el = typeof target === 'string' ? document.querySelector(target) : target
-    el?.scrollIntoView({ behavior: 'smooth' })
+  const run = (resolved) => {
+    if (lenisInstance) {
+      lenisInstance.scrollTo(resolved, options)
+    } else if (resolved instanceof Element) {
+      resolved.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } else if (typeof resolved === 'number') {
+      window.scrollTo({ top: resolved, behavior: 'smooth' })
+    }
   }
+
+  if (target === 0 || target === '0') {
+    run(0)
+    return
+  }
+
+  if (typeof target === 'string') {
+    const selector = target.startsWith('#') ? target : `#${target}`
+    const el = document.querySelector(selector)
+    if (el) {
+      run(el)
+      return
+    }
+    // Esperar secciones lazy/async (p. ej. #shop)
+    const deadline = Date.now() + 5000
+    const poll = () => {
+      const found = document.querySelector(selector)
+      if (found) {
+        run(found)
+        return
+      }
+      if (Date.now() < deadline) requestAnimationFrame(poll)
+    }
+    requestAnimationFrame(poll)
+    return
+  }
+
+  run(target)
 }
 
 export function stopScroll() {

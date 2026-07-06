@@ -4,7 +4,8 @@ import { useI18n } from 'vue-i18n'
 import { flavorVisuals } from '../../data/content'
 import { useLocalizedTestimonials } from '../../composables/useLocalizedContent'
 import { gsap } from '../../composables/useLenis'
-import TropicalSplash from '../tropical/TropicalSplash.vue'
+import { useSectionLife } from '../../composables/useSectionLife'
+import SectionAmbient from '../atmosphere/SectionAmbient.vue'
 import InfiniteMarquee from '../ui/InfiniteMarquee.vue'
 
 const { t } = useI18n()
@@ -17,6 +18,8 @@ const rowSmallB = computed(() => [...testimonials.value].reverse())
 function getFlavorColor(flavorId) {
   return flavorVisuals.find((f) => f.id === flavorId)?.primary || '#4AAB9E'
 }
+
+useSectionLife(sectionRef)
 
 onMounted(() => {
   gsap.from('.testimonials-heading', {
@@ -31,7 +34,7 @@ onMounted(() => {
 
 <template>
   <section id="testimonials" ref="sectionRef" data-nav-contrast="light" class="relative overflow-hidden bg-[#F7F0E3] py-24 md:py-40">
-    <TropicalSplash color="#2A7A72" flip />
+    <SectionAmbient variant="sand" :intensity="0.25" :show-bubbles="false" />
 
     <div class="relative z-10 mb-10 px-5 pt-8 md:mb-14 md:px-8 md:pt-12">
       <div class="testimonials-heading mx-auto max-w-7xl">
@@ -46,7 +49,7 @@ onMounted(() => {
     <div class="relative z-10 space-y-4 md:space-y-5">
       <InfiniteMarquee :items="testimonials" direction="left" :duration="42">
         <template #default="{ item }">
-          <article class="w-80 shrink-0 rounded-3xl bg-white p-6 shadow-[0_8px_32px_rgba(42,32,24,0.08)] md:w-96 md:p-8">
+          <article class="glass-ice w-80 shrink-0 rounded-3xl p-6 md:w-96 md:p-8 life-float">
             <div class="mb-4 flex items-center gap-3">
               <img :src="item.avatar" :alt="item.name" class="h-12 w-12 rounded-full object-cover ring-2 ring-[#4AAB9E]/20" loading="lazy" />
               <div>
@@ -63,7 +66,7 @@ onMounted(() => {
 
       <InfiniteMarquee class="hidden md:block" :items="rowSmallA" direction="right" :duration="30">
         <template #default="{ item }">
-          <article class="w-56 shrink-0 rounded-2xl bg-white/95 p-4 shadow-[0_4px_20px_rgba(42,32,24,0.06)] md:w-64 md:p-5">
+          <article class="glass-ice w-56 shrink-0 rounded-2xl p-4 md:w-64 md:p-5 life-float">
             <div class="mb-3 flex items-center gap-2.5">
               <img :src="item.avatar" :alt="item.name" class="h-9 w-9 rounded-full object-cover ring-2 ring-[#4AAB9E]/15" loading="lazy" />
               <div class="min-w-0">

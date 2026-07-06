@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCartStore } from '../../stores/cart'
+import { useAuthStore } from '../../stores/auth'
 import { scrollTo, stopScroll, startScroll } from '../../composables/useLenis'
 import { useNavSurface } from '../../composables/useNavSurface'
 import { setLocale } from '../../i18n'
@@ -11,13 +12,13 @@ const NAV_OFFSET = -96
 
 const { t, locale } = useI18n()
 const cart = useCartStore()
+const auth = useAuthStore()
 
 const navRef = ref(null)
 const menuOpen = ref(false)
 
 const { navTone, inHero, refresh } = useNavSurface(null, () => menuOpen.value)
 
-/** En hero: nav oscuro fijo (legible en todos los sabores). Fuera: detección por sección. */
 const isLightUi = computed(() => !inHero.value && navTone.value === 'light')
 
 watch(menuOpen, (open) => {
@@ -39,10 +40,10 @@ onUnmounted(() => {
 })
 
 const links = computed(() => [
-  { label: t('nav.story'), href: '#story' },
-  { label: t('nav.flavors'), href: '#flavors' },
-  { label: t('nav.contact'), href: '#contact' },
   { label: t('nav.shop'), href: '#shop' },
+  { label: t('nav.flavors'), href: '#flavors' },
+  { label: t('nav.story'), href: '#story' },
+  { label: t('nav.contact'), href: '#contact' },
 ])
 
 function navigate(href) {
@@ -52,6 +53,11 @@ function navigate(href) {
 
 function switchLang(lang) {
   setLocale(lang)
+}
+
+function handleAccount() {
+  if (auth.user) auth.logout()
+  else auth.openLogin()
 }
 
 onMounted(() => {
@@ -66,9 +72,7 @@ onMounted(() => {
   >
     <div
       class="nav-glass pointer-events-auto mx-auto flex h-[52px] max-w-6xl items-center justify-between gap-3 rounded-full border px-4 md:h-[56px] md:gap-4 md:px-6"
-      :class="isLightUi
-        ? 'nav-glass--light'
-        : 'nav-glass--dark'"
+      :class="isLightUi ? 'nav-glass--light' : 'nav-glass--dark'"
     >
       <a
         href="#"
@@ -84,12 +88,15 @@ onMounted(() => {
         />
       </a>
 
-      <nav class="hidden items-center gap-6 lg:flex xl:gap-8" aria-label="Principal">
+      <nav class="hidden items-center gap-5 lg:flex xl:gap-7" aria-label="Principal">
         <button
           v-for="link in links"
           :key="link.href"
           class="nav-link group relative font-body text-[13px] font-medium tracking-wide"
-          :class="isLightUi ? 'nav-link--light' : 'nav-link--dark'"
+          :class="[
+            isLightUi ? 'nav-link--light' : 'nav-link--dark',
+            link.href === '#shop' ? 'font-semibold' : '',
+          ]"
           @click="navigate(link.href)"
         >
           {{ link.label }}
@@ -100,13 +107,13 @@ onMounted(() => {
         </button>
       </nav>
 
-      <div class="flex shrink-0 items-center gap-1.5 md:gap-2">
+      <div class="flex shrink-0 items-center gap-1 md:gap-2">
         <div
-          class="hidden items-center rounded-full p-0.5 sm:flex"
+          class="flex items-center rounded-full p-0.5"
           :class="isLightUi ? 'bg-white/15' : 'bg-[#2A2018]/8'"
         >
           <button
-            class="rounded-full px-2.5 py-1 font-body text-[11px] font-semibold transition-colors duration-300"
+            class="rounded-full px-1.5 py-0.5 font-body text-[10px] font-semibold transition-colors duration-300 md:px-2.5 md:py-1 md:text-[11px]"
             :class="locale === 'es'
               ? (isLightUi ? 'bg-white text-[#2A2018]' : 'bg-[#2A2018] text-white')
               : (isLightUi ? 'text-white/60' : 'text-[#2A2018]/45')"
@@ -115,7 +122,7 @@ onMounted(() => {
             ES
           </button>
           <button
-            class="rounded-full px-2.5 py-1 font-body text-[11px] font-semibold transition-colors duration-300"
+            class="rounded-full px-1.5 py-0.5 font-body text-[10px] font-semibold transition-colors duration-300 md:px-2.5 md:py-1 md:text-[11px]"
             :class="locale === 'en'
               ? (isLightUi ? 'bg-white text-[#2A2018]' : 'bg-[#2A2018] text-white')
               : (isLightUi ? 'text-white/60' : 'text-[#2A2018]/45')"
@@ -124,21 +131,6 @@ onMounted(() => {
             EN
           </button>
         </div>
-
-        <a
-          href="https://www.instagram.com/drinkorita/"
-          target="_blank"
-          rel="noopener"
-          :aria-label="t('nav.instagram')"
-          class="hidden sm:block"
-        >
-          <img
-            src="/images/instagram.png"
-            alt=""
-            class="h-4 w-4"
-            :class="isLightUi ? 'nav-icon--light' : 'nav-icon--dark'"
-          />
-        </a>
 
         <button
           class="hidden items-center gap-1.5 rounded-full px-3.5 py-2 font-body text-[12px] font-semibold transition-colors duration-300 md:flex"
@@ -154,6 +146,20 @@ onMounted(() => {
             :class="isLightUi ? '' : 'brightness-0 invert'"
           />
           {{ t('nav.shop') }}
+        </button>
+
+        <button
+          class="flex h-9 max-w-[7rem] shrink-0 items-center justify-center gap-1.5 rounded-full px-2.5 sm:max-w-none sm:px-3 md:h-10"
+          :class="isLightUi ? 'hover:bg-white/15' : 'hover:bg-[#2A2018]/8'"
+          :aria-label="auth.user ? t('nav.logout') : t('nav.login')"
+          @click="handleAccount"
+        >
+          <svg class="h-4 w-4 shrink-0" :class="isLightUi ? 'text-white' : 'text-[#2A2018]'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span class="hidden truncate font-body text-[11px] font-semibold sm:inline" :class="isLightUi ? 'text-white/90' : 'text-[#2A2018]'">
+            {{ auth.user ? auth.user.name : t('nav.login') }}
+          </span>
         </button>
 
         <button
@@ -231,6 +237,23 @@ onMounted(() => {
         >
           {{ link.label }}
         </button>
+
+        <div class="mt-4 flex items-center gap-1 rounded-full bg-[#2A2018]/8 p-1">
+          <button
+            class="rounded-full px-4 py-2 font-body text-sm font-semibold transition-colors"
+            :class="locale === 'es' ? 'bg-white text-[#2A2018] shadow-sm' : 'text-[#2A2018]/50'"
+            @click="switchLang('es')"
+          >
+            ES
+          </button>
+          <button
+            class="rounded-full px-4 py-2 font-body text-sm font-semibold transition-colors"
+            :class="locale === 'en' ? 'bg-white text-[#2A2018] shadow-sm' : 'text-[#2A2018]/50'"
+            @click="switchLang('en')"
+          >
+            EN
+          </button>
+        </div>
       </div>
     </Transition>
   </Teleport>
@@ -270,16 +293,6 @@ onMounted(() => {
 
 .nav-logo--dark {
   filter: brightness(0);
-}
-
-.nav-icon--light {
-  filter: brightness(0) invert(1);
-  opacity: 0.85;
-}
-
-.nav-icon--dark {
-  filter: brightness(0);
-  opacity: 0.8;
 }
 
 .nav-link {

@@ -3,7 +3,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocalizedLocations } from '../../composables/useLocalizedContent'
 import { gsap, scrollTo } from '../../composables/useLenis'
-import BeachDecor from '../tropical/BeachDecor.vue'
+import { useSectionLife } from '../../composables/useSectionLife'
+import TropicalSplash from '../tropical/TropicalSplash.vue'
 import MexicoMap from './MexicoMap.vue'
 
 const { t } = useI18n()
@@ -14,6 +15,8 @@ const activeLocation = ref(null)
 const listLocations = computed(() =>
   locations.value.filter((l) => l.type !== 'ring' || ['north', 'pacific', 'gulf'].includes(l.id))
 )
+
+useSectionLife(sectionRef)
 
 function selectLocation(loc) {
   activeLocation.value = activeLocation.value?.id === loc.id ? null : loc
@@ -26,9 +29,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="map" ref="sectionRef" data-nav-contrast="dark" class="relative overflow-hidden bg-[#2A7A72] py-24 text-white md:py-40">
-    <BeachDecor />
-    <div class="tropical-grain pointer-events-none absolute inset-0 opacity-[0.04]" aria-hidden="true" />
+  <section id="map" ref="sectionRef" data-nav-contrast="dark" class="section-green relative overflow-hidden py-24 md:py-40">
+    <div class="tropical-grain pointer-events-none absolute inset-0 opacity-[0.03]" aria-hidden="true" />
     <div class="content-layer mx-auto max-w-7xl px-5 md:px-8">
       <div class="map-heading mb-12 md:mb-16">
         <p class="mb-3 font-body text-sm tracking-[0.3em] text-white/70 uppercase">{{ t('map.eyebrow') }}</p>
@@ -39,7 +41,7 @@ onMounted(() => {
       </div>
 
       <div class="grid gap-8 lg:grid-cols-5">
-        <div class="map-container relative overflow-hidden rounded-3xl bg-[#1f5c56]/60 p-4 shadow-xl md:p-6 lg:col-span-3">
+        <div class="map-container relative overflow-hidden rounded-3xl bg-white/10 p-4 shadow-xl md:p-6 lg:col-span-3">
           <MexicoMap
             :markers="locations"
             :active-id="activeLocation?.id"
@@ -57,7 +59,7 @@ onMounted(() => {
           <button
             v-for="loc in listLocations"
             :key="loc.id"
-            class="flex shrink-0 items-center justify-between rounded-2xl px-5 py-3.5 text-left transition-all duration-300"
+            class="flex shrink-0 items-center justify-between rounded-2xl px-5 py-3.5 text-left transition-all duration-500"
             :class="activeLocation?.id === loc.id ? 'bg-white/15 scale-[1.02]' : 'hover:bg-white/8'"
             @click="selectLocation(loc)"
           >
@@ -67,12 +69,12 @@ onMounted(() => {
             </div>
             <span
               class="h-2.5 w-2.5 shrink-0 rounded-full"
-              :class="activeLocation?.id === loc.id ? 'scale-150 bg-[#E8C84A]' : loc.type === 'ring' ? 'border border-white/70 bg-transparent' : 'bg-[#4AAB9E]'"
+              :class="activeLocation?.id === loc.id ? 'bg-[#E8C84A]' : loc.type === 'ring' ? 'border border-white/70 bg-transparent' : 'bg-[#4AAB9E]'"
             />
           </button>
           <button
             type="button"
-            class="mt-2 flex shrink-0 items-center justify-center gap-2 rounded-full bg-white py-3.5 font-display text-sm font-bold text-[#2A7A72] transition-all hover:scale-105"
+            class="magnetic-btn mt-2 flex shrink-0 items-center justify-center gap-2 rounded-full bg-white py-3.5 font-display text-sm font-bold text-[#2A7A72] transition-all"
             @click="scrollTo('#shop', { offset: -96 })"
           >
             <img src="/images/store_icon.png" alt="" class="h-4 w-4" />
@@ -81,6 +83,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <TropicalSplash color="#F7F0E3" simple />
   </section>
 </template>
 
