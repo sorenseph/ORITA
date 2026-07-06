@@ -1,22 +1,36 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWindowSize, usePreferredReducedMotion } from '@vueuse/core'
 import { useThemeStore } from '../../stores/theme'
 import { getAtmosphere } from '../../data/atmosphere'
 import { hexToGlsl, lerpColor } from '../../utils/color'
 import { useMouseDepth } from '../../composables/useMouseDepth'
+import { useVisibilityPause } from '../../composables/useVisibilityPause'
 import gsap from 'gsap'
 
+const rootRef = ref(null)
 const canvasRef = ref(null)
 const theme = useThemeStore()
 const { activeFlavor } = storeToRefs(theme)
 const { width, height } = useWindowSize()
 const { mx, my } = useMouseDepth()
 const reduced = usePreferredReducedMotion()
+const { isVisible } = useVisibilityPause(rootRef)
+
+const isMobile = computed(() => width.value < 768)
+const useStaticBg = computed(() => reduced.value || isMobile.value)
+
+const staticStyle = computed(() => {
+  const g = getAtmosphere(activeFlavor.value.id).gradient
+  return {
+    background: `linear-gradient(160deg, ${g[0]} 0%, ${g[1]} 38%, ${g[2]} 72%, ${g[3]} 100%)`,
+  }
+})
 
 let gl = null
 let program = null
+let uniforms = null
 let animationId = null
 let startTime = performance.now()
 let currentColors = getAtmosphere(activeFlavor.value.id).gradient.slice()
@@ -55,7 +69,7 @@ const FRAG = `
   float fbm(vec2 p) {
     float v = 0.0;
     float a = 0.5;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 3; i++) {
       v += a * noise(p);
       p *= 2.1;
       a *= 0.5;
@@ -70,7 +84,7 @@ const FRAG = `
 
     float t = u_time * 0.06;
     float n = fbm(p * 1.4 + vec2(t, t * 0.7) + u_mouse * 0.08);
-    float n2 = fbm(p * 2.2 - vec2(t * 0.5, t * 0.3));
+    float n2 = fbm(p * 2.0 - vec2(t * 0.5, t * 0.3));
     float wave = sin(p.x * 2.5 + t * 2.0 + n * 3.0) * 0.04;
 
     float blend = uv.y + n * 0.22 + n2 * 0.12 + wave + sin(t + uv.x) * 0.03;
@@ -92,9 +106,9 @@ function compile(type, src) {
 
 function initGl() {
   const canvas = canvasRef.value
-  if (!canvas) return
+  if (!canvas || useStaticBg.value) return
 
-  gl = canvas.getContext('webgl', { alpha: false, antialias: false })
+  gl = canvas.getContext('webgl', { alpha: false, antialias: false, powerPreference: 'low-power' })
   if (!gl) return
 
   const vs = compile(gl.VERTEX_SHADER, VERT)
@@ -103,6 +117,16 @@ function initGl() {
   gl.attachShader(program, vs)
   gl.attachShader(program, fs)
   gl.linkProgram(program)
+
+  uniforms = {
+    u_time: gl.getUniformLocation(program, 'u_time'),
+    u_res: gl.getUniformLocation(program, 'u_res'),
+    u_mouse: gl.getUniformLocation(program, 'u_mouse'),
+    u_c0: gl.getUniformLocation(program, 'u_c0'),
+    u_c1: gl.getUniformLocation(program, 'u_c1'),
+    u_c2: gl.getUniformLocation(program, 'u_c2'),
+    u_c3: gl.getUniformLocation(program, 'u_c3'),
+  }
 
   const buf = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, buf)
@@ -113,31 +137,35 @@ function initGl() {
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
 
   resize()
-  animate()
+  if (isVisible.value) animate()
 }
 
 function resize() {
   const canvas = canvasRef.value
   if (!canvas || !gl) return
-  const dpr = Math.min(devicePixelRatio, reduced.value ? 1 : 1.5)
+  const dpr = Math.min(devicePixelRatio, 1.25)
   canvas.width = canvas.offsetWidth * dpr
   canvas.height = canvas.offsetHeight * dpr
   gl.viewport(0, 0, canvas.width, canvas.height)
 }
 
 function setUniforms(t) {
+  if (!uniforms) return
   const g = currentColors.map(hexToGlsl)
-  gl.uniform1f(gl.getUniformLocation(program, 'u_time'), t)
-  gl.uniform2f(gl.getUniformLocation(program, 'u_res'), canvasRef.value.width, canvasRef.value.height)
-  gl.uniform2f(gl.getUniformLocation(program, 'u_mouse'), mx.value * 0.5, -my.value * 0.5)
-  gl.uniform3fv(gl.getUniformLocation(program, 'u_c0'), g[0])
-  gl.uniform3fv(gl.getUniformLocation(program, 'u_c1'), g[1])
-  gl.uniform3fv(gl.getUniformLocation(program, 'u_c2'), g[2])
-  gl.uniform3fv(gl.getUniformLocation(program, 'u_c3'), g[3])
+  gl.uniform1f(uniforms.u_time, t)
+  gl.uniform2f(uniforms.u_res, canvasRef.value.width, canvasRef.value.height)
+  gl.uniform2f(uniforms.u_mouse, mx.value * 0.5, -my.value * 0.5)
+  gl.uniform3fv(uniforms.u_c0, g[0])
+  gl.uniform3fv(uniforms.u_c1, g[1])
+  gl.uniform3fv(uniforms.u_c2, g[2])
+  gl.uniform3fv(uniforms.u_c3, g[3])
 }
 
 function animate() {
-  if (!gl || !program) return
+  if (!gl || !program || !isVisible.value) {
+    animationId = null
+    return
+  }
   animationId = requestAnimationFrame(animate)
 
   const t = (performance.now() - startTime) * 0.001
@@ -167,6 +195,26 @@ watch(activeFlavor, (f) => {
 
 watch([width, height], resize)
 
+watch(isVisible, (visible) => {
+  if (visible && gl && !animationId) animate()
+  if (!visible && animationId) {
+    cancelAnimationFrame(animationId)
+    animationId = null
+  }
+})
+
+watch(useStaticBg, (staticBg) => {
+  if (staticBg) {
+    cancelAnimationFrame(animationId)
+    animationId = null
+    gl = null
+    program = null
+    uniforms = null
+  } else if (!gl) {
+    initGl()
+  }
+})
+
 onMounted(initGl)
 onUnmounted(() => {
   cancelAnimationFrame(animationId)
@@ -175,9 +223,16 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <canvas
-    ref="canvasRef"
-    class="atmosphere-bg pointer-events-none absolute inset-0 h-full w-full"
-    aria-hidden="true"
-  />
+  <div ref="rootRef" class="atmosphere-bg pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+    <div
+      v-if="useStaticBg"
+      class="h-full w-full transition-[background] duration-[2000ms]"
+      :style="staticStyle"
+    />
+    <canvas
+      v-else
+      ref="canvasRef"
+      class="h-full w-full"
+    />
+  </div>
 </template>

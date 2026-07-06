@@ -5,20 +5,20 @@ import AppNav from './components/layout/AppNav.vue'
 import AppLoader from './components/ui/AppLoader.vue'
 import CustomCursor from './components/ui/CustomCursor.vue'
 import HeroSection from './components/hero/HeroSection.vue'
-import CartDrawer from './components/shop/CartDrawer.vue'
-import ContactSection from './components/contact/ContactSection.vue'
-import ShopSection from './components/shop/ShopSection.vue'
-import ShippingTracker from './components/shop/ShippingTracker.vue'
-import LoginModal from './components/auth/LoginModal.vue'
-import LegalModal from './components/legal/LegalModal.vue'
 
 const StoryLabSection = defineAsyncComponent(() => import('./components/story/StoryLabSection.vue'))
 const FlavorsSection = defineAsyncComponent(() => import('./components/flavors/FlavorsSection.vue'))
 const BenefitsSection = defineAsyncComponent(() => import('./components/benefits/BenefitsSection.vue'))
+const ShopSection = defineAsyncComponent(() => import('./components/shop/ShopSection.vue'))
+const ContactSection = defineAsyncComponent(() => import('./components/contact/ContactSection.vue'))
 const MapExperience = defineAsyncComponent(() => import('./components/map/MapExperience.vue'))
 const TestimonialsSection = defineAsyncComponent(() => import('./components/testimonials/TestimonialsSection.vue'))
 const InstagramMosaic = defineAsyncComponent(() => import('./components/instagram/InstagramMosaic.vue'))
 const AppFooter = defineAsyncComponent(() => import('./components/layout/AppFooter.vue'))
+const ShippingTracker = defineAsyncComponent(() => import('./components/shop/ShippingTracker.vue'))
+const CartDrawer = defineAsyncComponent(() => import('./components/shop/CartDrawer.vue'))
+const LoginModal = defineAsyncComponent(() => import('./components/auth/LoginModal.vue'))
+const LegalModal = defineAsyncComponent(() => import('./components/legal/LegalModal.vue'))
 
 const showLoader = ref(true)
 

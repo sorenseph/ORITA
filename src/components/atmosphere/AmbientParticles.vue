@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useWindowSize, usePreferredReducedMotion } from '@vueuse/core'
 import { useThemeStore } from '../../stores/theme'
 import { getAtmosphere } from '../../data/atmosphere'
-import gsap from 'gsap'
+import { useVisibilityPause } from '../../composables/useVisibilityPause'
 
 const props = defineProps({
   density: { type: Number, default: 1 },
@@ -12,11 +12,13 @@ const props = defineProps({
   wind: { type: Number, default: null },
 })
 
+const rootRef = ref(null)
 const canvasRef = ref(null)
 const theme = useThemeStore()
 const { activeFlavor } = storeToRefs(theme)
 const { width } = useWindowSize()
 const reduced = usePreferredReducedMotion()
+const { isVisible } = useVisibilityPause(rootRef)
 
 const isMobile = computed(() => width.value < 768)
 const atmo = computed(() => getAtmosphere(activeFlavor.value.id))
@@ -28,8 +30,8 @@ let particles = []
 let animationId = null
 
 function count() {
-  const base = isMobile.value ? 18 : 40
-  return Math.round(base * props.density)
+  const base = isMobile.value ? 12 : 28
+  return Math.max(6, Math.round(base * props.density))
 }
 
 function spawn(w, h) {
@@ -37,18 +39,23 @@ function spawn(w, h) {
   particles = Array.from({ length: count() }, () => ({
     x: Math.random() * w,
     y: Math.random() * h,
-    size: Math.random() * 4 + 1.5,
+    size: Math.random() * 3.5 + 1.5,
     speedX: (Math.random() - 0.5) * 0.2 * particleWind.value,
     speedY: -(Math.random() * 0.25 + 0.06),
     wobble: Math.random() * Math.PI * 2,
     wobbleSpeed: 0.3 + Math.random() * 0.4,
-    opacity: Math.random() * 0.22 + 0.06,
+    opacity: Math.random() * 0.2 + 0.06,
     hue: hues[Math.floor(Math.random() * hues.length)],
     phase: Math.random() * Math.PI * 2,
   }))
 }
 
 function draw(t) {
+  if (!isVisible.value) {
+    animationId = null
+    return
+  }
+
   const canvas = canvasRef.value
   if (!canvas || !ctx) return
   const w = canvas.offsetWidth
@@ -60,7 +67,7 @@ function draw(t) {
     p.wobble += 0.008 * p.wobbleSpeed
     p.x += p.speedX + Math.sin(time * p.wobbleSpeed + p.phase) * 0.15
     p.y += p.speedY
-  if (p.y < -12) {
+    if (p.y < -12) {
       p.y = h + 12
       p.x = Math.random() * w
     }
@@ -80,12 +87,17 @@ function draw(t) {
 function resize() {
   const canvas = canvasRef.value
   if (!canvas) return
-  const dpr = Math.min(devicePixelRatio, isMobile.value ? 1 : 1.5)
+  const dpr = Math.min(devicePixelRatio, isMobile.value ? 1 : 1.25)
   canvas.width = canvas.offsetWidth * dpr
   canvas.height = canvas.offsetHeight * dpr
   ctx = canvas.getContext('2d')
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   spawn(canvas.offsetWidth, canvas.offsetHeight)
+}
+
+function startLoop() {
+  if (animationId || reduced.value) return
+  animationId = requestAnimationFrame(draw)
 }
 
 watch(particleHues, (hues) => {
@@ -94,12 +106,19 @@ watch(particleHues, (hues) => {
   })
 })
 
+watch(isVisible, (visible) => {
+  if (visible) startLoop()
+  else if (animationId) {
+    cancelAnimationFrame(animationId)
+    animationId = null
+  }
+})
+
 onMounted(() => {
   if (reduced.value) return
   resize()
   window.addEventListener('resize', resize)
-  animationId = requestAnimationFrame(draw)
-  gsap.from(canvasRef.value, { opacity: 0, duration: 2, ease: 'power2.out' })
+  if (isVisible.value) startLoop()
 })
 
 onUnmounted(() => {
@@ -109,10 +128,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <canvas
-    v-if="!reduced"
-    ref="canvasRef"
-    class="atmosphere-particles pointer-events-none absolute inset-0 h-full w-full"
-    aria-hidden="true"
-  />
+  <div v-if="!reduced" ref="rootRef" class="atmosphere-particles pointer-events-none absolute inset-0 h-full w-full">
+    <canvas ref="canvasRef" class="h-full w-full" aria-hidden="true" />
+  </div>
 </template>

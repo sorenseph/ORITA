@@ -51,7 +51,7 @@ onUnmounted(() => { if (autoplayRef.value) clearInterval(autoplayRef.value) })
 <template>
   <section id="story" ref="sectionRef" class="relative">
     <div class="story-brand relative overflow-hidden bg-[#3BBFA3] px-5 py-20 md:px-8 md:py-28" data-nav-contrast="dark">
-      <SectionAmbient variant="tropical" :intensity="0.5" />
+      <SectionAmbient variant="tropical" :intensity="0.5" :show-particles="false" :show-bubbles="false" />
       <TropicalSplash color="#F7F0E3" flip simple />
       <BeachDecor minimal />
       <div class="content-layer mx-auto max-w-3xl text-center">
@@ -65,7 +65,7 @@ onUnmounted(() => { if (autoplayRef.value) clearInterval(autoplayRef.value) })
     </div>
 
     <div class="relative py-20 md:py-32" data-nav-contrast="light">
-      <SectionAmbient variant="sand" :intensity="0.35" :show-bubbles="false" />
+      <SectionAmbient variant="sand" :intensity="0.35" :show-bubbles="false" :show-particles="false" />
       <SmallLeaves />
       <div class="content-layer mx-auto max-w-6xl px-5 md:px-8">
         <div class="motion-reveal mb-12 text-center md:mb-16">

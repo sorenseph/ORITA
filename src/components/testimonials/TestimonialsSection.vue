@@ -34,7 +34,7 @@ onMounted(() => {
 
 <template>
   <section id="testimonials" ref="sectionRef" data-nav-contrast="light" class="relative overflow-hidden bg-[#F7F0E3] py-24 md:py-40">
-    <SectionAmbient variant="sand" :intensity="0.25" :show-bubbles="false" />
+    <SectionAmbient variant="sand" :intensity="0.25" :show-bubbles="false" :show-particles="false" />
 
     <div class="relative z-10 mb-10 px-5 pt-8 md:mb-14 md:px-8 md:pt-12">
       <div class="testimonials-heading mx-auto max-w-7xl">

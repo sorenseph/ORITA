@@ -6,6 +6,8 @@ import { useThemeStore } from '../../stores/theme'
 import { getAtmosphere } from '../../data/atmosphere'
 import { hexToRgb } from '../../utils/color'
 
+import { useVisibilityPause } from '../../composables/useVisibilityPause'
+
 const props = defineProps({
   modelUrl: { type: String, default: '/models/orita-bottle.glb' },
   scrollProgress: { type: Number, default: 0 },
@@ -14,6 +16,7 @@ const props = defineProps({
 const emit = defineEmits(['ready', 'error'])
 
 const containerRef = ref(null)
+const { isVisible } = useVisibilityPause(containerRef)
 const { activeFlavor } = storeToRefs(useThemeStore())
 const { x: mouseX, y: mouseY } = useMouse()
 
@@ -53,7 +56,7 @@ async function init() {
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
   renderer.setSize(w, h)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.1
@@ -111,6 +114,10 @@ function applyFlavorLights(flavorId) {
 }
 
 function animate() {
+  if (!isVisible.value) {
+    animationId = null
+    return
+  }
   animationId = requestAnimationFrame(animate)
   if (!model || !renderer) return
 
@@ -137,6 +144,10 @@ function onResize() {
   camera.updateProjectionMatrix()
   renderer.setSize(w, h)
 }
+
+watch(isVisible, (visible) => {
+  if (visible && renderer && !animationId) animate()
+})
 
 watch(() => props.scrollProgress, () => {})
 watch(activeFlavor, (f) => applyFlavorLights(f.id))

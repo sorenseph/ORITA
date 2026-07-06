@@ -30,7 +30,7 @@ onMounted(() => {
 
 <template>
   <section id="instagram" ref="sectionRef" data-nav-contrast="light" class="relative overflow-hidden py-24 md:py-40">
-    <SectionAmbient variant="sand" :intensity="0.3" :show-bubbles="false" />
+    <SectionAmbient variant="sand" :intensity="0.3" :show-bubbles="false" :show-particles="false" />
     <SmallLeaves />
     <BeachDecor light />
     <div class="relative z-10 mx-auto max-w-7xl px-5 md:px-8">

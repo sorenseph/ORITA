@@ -88,15 +88,6 @@ function animateHeadline() {
       delay: i * 0.035,
       ease: 'back.out(1.35)',
     })
-
-    gsap.to(span, {
-      y: -2,
-      duration: 2.2 + (i % 4) * 0.15,
-      delay: 0.5 + i * 0.035,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
-    })
   })
 }
 

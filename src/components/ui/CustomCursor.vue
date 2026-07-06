@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useCustomCursor } from '../../composables/useCustomCursor'
 
 const outerRef = ref(null)
@@ -16,15 +16,13 @@ function loop() {
 onMounted(() => {
   if (!active.value) return
   init(outerRef.value, innerRef.value)
-  loop()
+  raf = requestAnimationFrame(loop)
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(raf)
   destroy()
 })
-
-watch([x, y], update)
 </script>
 
 <template>

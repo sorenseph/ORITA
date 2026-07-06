@@ -6,36 +6,63 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 gsap.registerPlugin(ScrollTrigger)
 
 let lenisInstance = null
+let lenisRaf = null
+
+function prefersReducedMotion() {
+  return typeof window !== 'undefined'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+function isCoarsePointer() {
+  return typeof window !== 'undefined'
+    && window.matchMedia('(pointer: coarse)').matches
+}
 
 export function getLenis() {
   return lenisInstance
 }
 
 export function useLenis() {
+  let stTicking = false
+
+  function onLenisScroll() {
+    if (stTicking) return
+    stTicking = true
+    requestAnimationFrame(() => {
+      ScrollTrigger.update()
+      stTicking = false
+    })
+  }
+
   onMounted(() => {
+    if (prefersReducedMotion() || isCoarsePointer()) return
+
     lenisInstance = new Lenis({
-      duration: 1.4,
+      duration: 1.05,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       smoothWheel: true,
+      wheelMultiplier: 0.9,
     })
 
-    lenisInstance.on('scroll', ScrollTrigger.update)
+    lenisInstance.on('scroll', onLenisScroll)
 
-    gsap.ticker.add((time) => {
-      lenisInstance.raf(time * 1000)
-    })
-    gsap.ticker.lagSmoothing(0)
+    lenisRaf = (time) => {
+      lenisInstance?.raf(time * 1000)
+    }
+    gsap.ticker.add(lenisRaf)
 
     document.documentElement.classList.add('lenis', 'lenis-smooth')
   })
 
   onUnmounted(() => {
-    if (lenisInstance) {
-      lenisInstance.destroy()
-      lenisInstance = null
+    if (lenisRaf) {
+      gsap.ticker.remove(lenisRaf)
+      lenisRaf = null
     }
-    gsap.ticker.remove(lenisInstance?.raf)
+    lenisInstance?.destroy()
+    lenisInstance = null
+    document.documentElement.classList.remove('lenis', 'lenis-smooth', 'lenis-stopped')
   })
 
   return { getLenis: () => lenisInstance }
@@ -64,7 +91,6 @@ export function scrollTo(target, options = {}) {
       run(el)
       return
     }
-    // Esperar secciones lazy/async (p. ej. #shop)
     const deadline = Date.now() + 5000
     const poll = () => {
       const found = document.querySelector(selector)

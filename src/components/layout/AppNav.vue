@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import { useCartStore } from '../../stores/cart'
 import { useAuthStore } from '../../stores/auth'
+import { useThemeStore } from '../../stores/theme'
 import { scrollTo, stopScroll, startScroll } from '../../composables/useLenis'
 import { useNavSurface } from '../../composables/useNavSurface'
 import { setLocale } from '../../i18n'
@@ -13,11 +15,16 @@ const NAV_OFFSET = -96
 const { t, locale } = useI18n()
 const cart = useCartStore()
 const auth = useAuthStore()
+const { activeFlavor } = storeToRefs(useThemeStore())
 
 const navRef = ref(null)
 const menuOpen = ref(false)
 
-const { navTone, inHero, refresh } = useNavSurface(null, () => menuOpen.value)
+function getAutoNavTone() {
+  return activeFlavor.value.textOnBg === '#2A2018' ? 'dark-text' : 'light-text'
+}
+
+const { navTone, inHero, refresh } = useNavSurface(getAutoNavTone, () => menuOpen.value)
 
 const isLightUi = computed(() => !inHero.value && navTone.value === 'light')
 

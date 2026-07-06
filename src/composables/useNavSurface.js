@@ -6,6 +6,8 @@ export function useNavSurface(getAutoTone, isPaused) {
   const navTone = ref('dark')
   const inHero = ref(true)
   let rafId = 0
+  let lastRun = 0
+  const THROTTLE_MS = 120
 
   function resolveTone() {
     const hero = document.getElementById('hero')
@@ -48,22 +50,35 @@ export function useNavSurface(getAutoTone, isPaused) {
 
   function update() {
     if (isPaused?.()) return
+    const now = performance.now()
+    if (now - lastRun < THROTTLE_MS) return
     cancelAnimationFrame(rafId)
-    rafId = requestAnimationFrame(resolveTone)
+    rafId = requestAnimationFrame(() => {
+      lastRun = performance.now()
+      resolveTone()
+    })
   }
 
   onMounted(() => {
     resolveTone()
-    window.addEventListener('scroll', update, { passive: true })
+    const lenis = getLenis()
+    if (lenis) {
+      lenis.on('scroll', update)
+    } else {
+      window.addEventListener('scroll', update, { passive: true })
+    }
     window.addEventListener('resize', update, { passive: true })
-    getLenis()?.on('scroll', update)
   })
 
   onUnmounted(() => {
     cancelAnimationFrame(rafId)
-    window.removeEventListener('scroll', update)
+    const lenis = getLenis()
+    if (lenis) {
+      lenis.off('scroll', update)
+    } else {
+      window.removeEventListener('scroll', update)
+    }
     window.removeEventListener('resize', update)
-    getLenis()?.off('scroll', update)
   })
 
   return { navTone, inHero, refresh: update }

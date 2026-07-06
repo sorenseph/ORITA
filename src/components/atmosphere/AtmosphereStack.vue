@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 import LiquidShaderBg from './LiquidShaderBg.vue'
 import AgaveSilhouettes from './AgaveSilhouettes.vue'
 import CloudMistLayer from './CloudMistLayer.vue'
@@ -8,15 +10,18 @@ import AmbientBubbles from './AmbientBubbles.vue'
 defineProps({
   scrollProgress: { type: Number, default: 0 },
 })
+
+const { width } = useWindowSize()
+const isMobile = computed(() => width.value < 768)
 </script>
 
 <template>
   <div class="atmosphere-stack pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
     <LiquidShaderBg />
     <AgaveSilhouettes />
-    <CloudMistLayer />
-    <AmbientParticles />
-    <AmbientBubbles />
+    <CloudMistLayer v-if="!isMobile" />
+    <AmbientParticles :density="isMobile ? 0.45 : 0.85" />
+    <AmbientBubbles v-if="!isMobile" />
   </div>
 </template>
 

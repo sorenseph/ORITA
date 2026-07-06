@@ -49,7 +49,7 @@ onMounted(() => {
 
 <template>
   <section id="benefits" ref="sectionRef" data-nav-contrast="light" class="relative overflow-hidden py-16 md:py-40">
-    <SectionAmbient variant="sand" :intensity="0.4" />
+    <SectionAmbient variant="sand" :intensity="0.4" :show-particles="false" :show-bubbles="false" />
     <SmallLeaves />
     <BeachDecor light minimal />
     <div class="content-layer relative z-10 mx-auto max-w-7xl px-5 md:px-8">
