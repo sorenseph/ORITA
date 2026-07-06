@@ -27,7 +27,7 @@ onMounted(() => {
 
 <template>
   <section id="benefits" ref="sectionRef" data-nav-contrast="light" class="relative overflow-hidden py-24 md:py-40">
-    <BeachDecor light />
+    <BeachDecor light minimal />
     <div class="relative z-10 mx-auto max-w-7xl px-5 md:px-8">
       <div class="benefits-heading mb-16 text-center md:mb-20">
         <p class="mb-3 font-body text-sm tracking-[0.3em] text-[#4AAB9E] uppercase">{{ t('benefits.eyebrow') }}</p>
@@ -46,7 +46,7 @@ onMounted(() => {
           <div class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl opacity-30 transition-opacity group-hover:opacity-50" :style="{ background: benefit.accent }" aria-hidden="true" />
           <div class="relative z-10">
             <div class="mb-6 flex items-end gap-2">
-              <span :ref="(el) => (statRefs[i] = el)" class="font-display text-6xl font-extrabold leading-none md:text-8xl" :style="{ color: benefit.accent }">{{ benefit.stat }}</span>
+              <span :ref="(el) => (statRefs[i] = el)" class="font-display text-5xl font-extrabold leading-none md:text-8xl" :style="{ color: benefit.accent }">{{ benefit.stat }}</span>
               <span class="mb-2 font-display text-xl font-bold text-[#2A2018]/50 md:text-2xl">{{ benefit.unit }}</span>
             </div>
             <h3 class="mb-2 font-display text-2xl font-bold text-[#2A2018] md:text-3xl">{{ benefit.title }}</h3>
@@ -58,6 +58,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <TropicalSplash color="#2A7A72" />
+    <TropicalSplash class="md:hidden" color="#2A7A72" simple />
+    <TropicalSplash class="hidden md:block" color="#2A7A72" />
   </section>
 </template>

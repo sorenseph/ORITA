@@ -86,8 +86,8 @@ onUnmounted(stopAutoplay)
     @mouseenter="isPaused = true"
     @mouseleave="isPaused = false"
   >
-    <BeachDecor />
-    <div class="tropical-grain pointer-events-none absolute inset-0 opacity-[0.06]" aria-hidden="true" />
+    <BeachDecor minimal />
+    <div class="tropical-grain pointer-events-none absolute inset-0 opacity-[0.03] md:opacity-[0.06]" aria-hidden="true" />
 
     <div class="relative z-10 mx-auto max-w-7xl px-5 md:px-8">
       <div class="flavors-heading mb-12 md:mb-16">
@@ -168,7 +168,7 @@ onUnmounted(stopAutoplay)
               :key="`${activeLocalized.id}-${ing.key}`"
               :src="ing.img"
               :alt="ing.label"
-              class="flavor-float absolute h-16 w-16 object-contain md:h-24 md:w-24"
+              class="flavor-float absolute hidden h-16 w-16 object-contain md:block md:h-24 md:w-24"
               :style="{
                 top: `${8 + i * 22}%`,
                 left: i % 2 === 0 ? '-2%' : 'auto',
@@ -183,7 +183,7 @@ onUnmounted(stopAutoplay)
         <div>
           <Transition name="flavor" mode="out-in">
             <div :key="activeLocalized.id">
-              <img :src="theme.activeFlavor.title" :alt="activeLocalized.name" class="mb-4 h-10 w-auto max-w-[240px] md:h-12 md:max-w-[300px]" loading="lazy" />
+              <img :src="theme.activeFlavor.title" :alt="activeLocalized.name" class="mb-3 h-7 w-auto max-w-[160px] md:mb-4 md:h-12 md:max-w-[300px]" loading="lazy" />
               <h3 class="mb-2 font-display text-2xl font-bold md:text-3xl">{{ activeLocalized.name }}</h3>
               <p class="mb-2 font-editorial text-xl italic md:text-2xl" :style="{ opacity: 0.9 }">
                 {{ activeLocalized.tagline }}
@@ -238,7 +238,8 @@ onUnmounted(stopAutoplay)
       </div>
     </div>
 
-    <TropicalSplash :color="theme.activeFlavor.waveColor" animated ocean />
+    <TropicalSplash class="md:hidden" :color="theme.activeFlavor.waveColor" simple />
+    <TropicalSplash class="hidden md:block" :color="theme.activeFlavor.waveColor" animated ocean />
   </section>
 </template>
 

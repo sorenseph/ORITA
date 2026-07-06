@@ -29,7 +29,7 @@ onMounted(() => {
   <section id="map" ref="sectionRef" data-nav-contrast="dark" class="relative overflow-hidden bg-[#2A7A72] py-24 text-white md:py-40">
     <BeachDecor />
     <div class="tropical-grain pointer-events-none absolute inset-0 opacity-[0.04]" aria-hidden="true" />
-    <div class="relative z-10 mx-auto max-w-7xl px-5 md:px-8">
+    <div class="content-layer mx-auto max-w-7xl px-5 md:px-8">
       <div class="map-heading mb-12 md:mb-16">
         <p class="mb-3 font-body text-sm tracking-[0.3em] text-white/70 uppercase">{{ t('map.eyebrow') }}</p>
         <h2 class="font-display text-4xl font-bold md:text-6xl">

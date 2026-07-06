@@ -104,7 +104,6 @@ export const flavorVisuals = [
     collage: [
       { img: '/images/jamaica1.png', top: '6%', left: '-5%', w: 130, rotate: -8, delay: 0 },
       { img: '/recursos/romero/rosemary2.png', top: '10%', right: '-3%', w: 120, rotate: 12, delay: 0.15 },
-      { img: '/recursos/hojas/hoja5.png', bottom: '12%', left: '2%', w: 115, rotate: 5, delay: 0.25 },
       { img: '/images/jamaica2.png', bottom: '6%', right: '0%', w: 110, rotate: -9, delay: 0.35 },
     ],
     emoji: '🌸',
@@ -129,17 +128,17 @@ export const mapConnections = [
   ['gulf', 'cancun'],
 ]
 
-/** Coordenadas SVG (viewBox 606.73 × 416.78) — alineadas al map-mexico.svg */
+/** Coordenadas SVG (viewBox 606.73 × 416.78) — ancladas a puntos del map-mexico.svg */
 export const mapMarkers = [
-  { id: 'gdl', svgX: 175, svgY: 195, stores: 22, type: 'dot', region: 'jalisco' },
-  { id: 'puerto-vallarta', svgX: 155, svgY: 165, stores: 8, type: 'dot', region: 'jalisco' },
-  { id: 'tequila', svgX: 165, svgY: 225, stores: 6, type: 'dot', region: 'jalisco' },
-  { id: 'bcs', svgX: 95, svgY: 115, stores: 10, type: 'region', region: 'bcs' },
-  { id: 'oaxaca', svgX: 230, svgY: 285, stores: 8, type: 'region', region: 'oaxaca' },
-  { id: 'cancun', svgX: 440, svgY: 240, stores: 12, type: 'region', region: 'cancun' },
-  { id: 'north', svgX: 175, svgY: 75, stores: 15, type: 'ring', region: 'north' },
-  { id: 'pacific', svgX: 45, svgY: 185, stores: 18, type: 'ring', region: 'pacific' },
-  { id: 'gulf', svgX: 355, svgY: 200, stores: 14, type: 'ring', region: 'gulf' },
+  { id: 'gdl', svgX: 203.11, svgY: 160.9, stores: 22, type: 'dot', region: 'jalisco' },
+  { id: 'puerto-vallarta', svgX: 150.35, svgY: 160.9, stores: 8, type: 'dot', region: 'jalisco' },
+  { id: 'tequila', svgX: 160.9, svgY: 160.9, stores: 6, type: 'dot', region: 'jalisco' },
+  { id: 'bcs', svgX: 129.24, svgY: 76.48, stores: 10, type: 'region', region: 'bcs' },
+  { id: 'oaxaca', svgX: 213.67, svgY: 298.09, stores: 8, type: 'region', region: 'oaxaca' },
+  { id: 'cancun', svgX: 561.9, svgY: 298.09, stores: 12, type: 'region', region: 'cancun' },
+  { id: 'north', svgX: 203.11, svgY: 97.59, stores: 15, type: 'ring', region: 'north' },
+  { id: 'pacific', svgX: 65.93, svgY: 97.59, stores: 18, type: 'ring', region: 'pacific' },
+  { id: 'gulf', svgX: 435.27, svgY: 329.74, stores: 14, type: 'ring', region: 'gulf' },
 ]
 
 export const flavorPackIds = {

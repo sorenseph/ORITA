@@ -61,7 +61,7 @@ onMounted(() => {
         </template>
       </InfiniteMarquee>
 
-      <InfiniteMarquee :items="rowSmallA" direction="right" :duration="30">
+      <InfiniteMarquee class="hidden md:block" :items="rowSmallA" direction="right" :duration="30">
         <template #default="{ item }">
           <article class="w-56 shrink-0 rounded-2xl bg-white/95 p-4 shadow-[0_4px_20px_rgba(42,32,24,0.06)] md:w-64 md:p-5">
             <div class="mb-3 flex items-center gap-2.5">
@@ -77,7 +77,7 @@ onMounted(() => {
         </template>
       </InfiniteMarquee>
 
-      <InfiniteMarquee :items="rowSmallB" direction="left" :duration="26">
+      <InfiniteMarquee class="hidden md:block" :items="rowSmallB" direction="left" :duration="26">
         <template #default="{ item }">
           <article class="w-52 shrink-0 rounded-2xl border border-[#2A2018]/6 bg-[#F7F0E3] p-4 md:w-60 md:p-5">
             <div class="mb-2 flex items-center gap-2">

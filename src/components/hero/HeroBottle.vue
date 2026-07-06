@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useMouse } from '@vueuse/core'
+import { useWindowSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useThemeStore } from '../../stores/theme'
 import { useLocalizedFlavors } from '../../composables/useLocalizedContent'
@@ -14,6 +14,7 @@ const props = defineProps({
 const theme = useThemeStore()
 const { activeFlavorIndex, activeFlavor } = storeToRefs(theme)
 const localizedFlavors = useLocalizedFlavors()
+const { width } = useWindowSize()
 
 const parallaxRef = ref(null)
 const floatRef = ref(null)
@@ -22,17 +23,16 @@ const frontRef = ref(null)
 const backMirrorRef = ref(null)
 const frontMirrorRef = ref(null)
 const show3d = ref(false)
-const { x: mouseX, y: mouseY } = useMouse()
 
+const isMobile = computed(() => width.value < 768)
 const current = computed(() => localizedFlavors.value[activeFlavorIndex.value])
 
 const parallaxStyle = computed(() => {
-  const cx = typeof window !== 'undefined' ? window.innerWidth / 2 : 0
+  if (isMobile.value) return { transform: 'none' }
+  const cx = width.value / 2
   const cy = typeof window !== 'undefined' ? window.innerHeight / 2 : 0
-  const dx = (mouseX.value - cx) / cx
-  const dy = (mouseY.value - cy) / cy
   return {
-    transform: `translate3d(0, ${-props.scrollProgress * 20}px, 0) rotateY(${dx * 3}deg) rotateX(${-dy * 2.5}deg)`,
+    transform: `translate3d(0, ${-props.scrollProgress * 20}px, 0)`,
   }
 })
 
@@ -40,12 +40,19 @@ let floatTween = null
 let transitionTween = null
 let ready = false
 
+function bottleRest() {
+  return isMobile.value
+    ? { back: { x: -10, rotation: -6, opacity: 0.45 }, front: { x: 6, rotation: 3, opacity: 1 } }
+    : { back: { x: -16, rotation: -7, opacity: 0.5 }, front: { x: 8, rotation: 4, opacity: 1 } }
+}
+
 function setBottleRest() {
   if (!backRef.value || !frontRef.value) return
-  gsap.set(backRef.value, { x: -16, rotation: -7, opacity: 0.5 })
-  gsap.set(frontRef.value, { x: 8, rotation: 4, opacity: 1 })
-  if (backMirrorRef.value) gsap.set(backMirrorRef.value, { x: -16, rotation: -7, opacity: 0.2 })
-  if (frontMirrorRef.value) gsap.set(frontMirrorRef.value, { x: 8, rotation: 4, opacity: 0.35 })
+  const rest = bottleRest()
+  gsap.set(backRef.value, rest.back)
+  gsap.set(frontRef.value, rest.front)
+  if (backMirrorRef.value) gsap.set(backMirrorRef.value, { ...rest.back, opacity: rest.back.opacity * 0.4 })
+  if (frontMirrorRef.value) gsap.set(frontMirrorRef.value, { ...rest.front, opacity: rest.front.opacity * 0.35 })
 }
 
 function playFlavorTransition() {
@@ -55,22 +62,33 @@ function playFlavorTransition() {
   const targets = [backRef.value, frontRef.value, backMirrorRef.value, frontMirrorRef.value].filter(Boolean)
   gsap.killTweensOf(targets)
 
+  const rest = bottleRest()
+  const fromX = isMobile.value ? 36 : 80
+
   transitionTween = gsap.timeline()
   transitionTween
-    .fromTo(backRef.value, { x: -80, rotation: -14, opacity: 0 }, { x: -16, rotation: -7, opacity: 0.5, duration: 0.55, ease: 'power3.out' })
-    .fromTo(frontRef.value, { x: 80, rotation: 10, opacity: 0 }, { x: 8, rotation: 4, opacity: 1, duration: 0.55, ease: 'power3.out' }, '<0.06')
+    .fromTo(backRef.value, { x: -fromX, rotation: rest.back.rotation - 6, opacity: 0 }, { ...rest.back, duration: 0.5, ease: 'power3.out' })
+    .fromTo(frontRef.value, { x: fromX, rotation: rest.front.rotation + 6, opacity: 0 }, { ...rest.front, duration: 0.5, ease: 'power3.out' }, '<0.05')
 
   if (backMirrorRef.value) {
-    transitionTween.fromTo(backMirrorRef.value, { x: -80, rotation: -14, opacity: 0 }, { x: -16, rotation: -7, opacity: 0.2, duration: 0.55, ease: 'power3.out' }, '<')
+    transitionTween.fromTo(backMirrorRef.value, { x: -fromX, opacity: 0 }, { ...rest.back, opacity: rest.back.opacity * 0.4, duration: 0.5, ease: 'power3.out' }, '<')
   }
   if (frontMirrorRef.value) {
-    transitionTween.fromTo(frontMirrorRef.value, { x: 80, rotation: 10, opacity: 0 }, { x: 8, rotation: 4, opacity: 0.35, duration: 0.55, ease: 'power3.out' }, '<0.06')
+    transitionTween.fromTo(frontMirrorRef.value, { x: fromX, opacity: 0 }, { ...rest.front, opacity: rest.front.opacity * 0.35, duration: 0.5, ease: 'power3.out' }, '<0.05')
   }
 }
 
 onMounted(() => {
   setBottleRest()
-  floatTween = gsap.to(floatRef.value, { y: -8, duration: 3.8, ease: 'sine.inOut', yoyo: true, repeat: -1 })
+  if (floatRef.value) {
+    floatTween = gsap.to(floatRef.value, {
+      y: isMobile.value ? -5 : -8,
+      duration: isMobile.value ? 3.2 : 3.8,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    })
+  }
   ready = true
 })
 
@@ -83,17 +101,35 @@ watch(activeFlavorIndex, (n, o) => {
   if (o === n || !ready) return
   playFlavorTransition()
 })
+
+watch(isMobile, () => {
+  floatTween?.kill()
+  setBottleRest()
+  if (floatRef.value) {
+    floatTween = gsap.to(floatRef.value, {
+      y: isMobile.value ? -5 : -8,
+      duration: isMobile.value ? 3.2 : 3.8,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    })
+  }
+})
 </script>
 
 <template>
-  <div class="hero-bottle relative flex h-full w-full items-end justify-center perspective-[1200px] md:items-center">
+  <div
+    class="hero-bottle relative flex h-full w-full items-end justify-center md:perspective-[1200px] md:items-center"
+    :class="isMobile ? 'hero-bottle--mobile' : ''"
+  >
     <div
-      class="pointer-events-none absolute inset-0 z-0 opacity-50"
+      class="pointer-events-none absolute inset-0 z-0 opacity-25 md:opacity-50"
       aria-hidden="true"
       :style="{ background: `radial-gradient(ellipse 70% 60% at 50% 58%, ${activeFlavor.primary}35, transparent 72%)` }"
     />
 
     <div
+      v-if="!isMobile"
       class="relative z-10 h-full w-full max-w-md transition-opacity duration-700 md:max-w-lg"
       :class="show3d ? 'opacity-100' : 'pointer-events-none absolute opacity-0'"
     >
@@ -101,9 +137,9 @@ watch(activeFlavorIndex, (n, o) => {
     </div>
 
     <div
-      v-show="!show3d"
+      v-show="isMobile || !show3d"
       ref="parallaxRef"
-      class="relative z-10 h-full w-full will-change-transform"
+      class="relative z-10 h-full w-full md:will-change-transform"
       :style="parallaxStyle"
     >
       <div ref="floatRef" class="flex h-full w-full flex-col items-center justify-end pb-0 md:justify-center">
@@ -135,6 +171,18 @@ watch(activeFlavorIndex, (n, o) => {
   --bottle-front: min(52dvh, 480px);
   --bottle-back: min(44dvh, 400px);
   --bottle-reflect: min(9dvh, 88px);
+}
+
+.hero-bottle--mobile {
+  --bottle-front: min(46svh, 300px);
+  --bottle-back: min(38svh, 250px);
+  --bottle-reflect: 0px;
+}
+
+@media (max-width: 767px) {
+  .bottle-reflection {
+    display: none;
+  }
 }
 
 @media (min-width: 768px) {
@@ -169,6 +217,7 @@ watch(activeFlavorIndex, (n, o) => {
   width: auto;
   max-width: none;
   object-fit: contain;
+  will-change: transform, opacity;
 }
 
 .bottle-front {
@@ -179,7 +228,8 @@ watch(activeFlavorIndex, (n, o) => {
   width: auto;
   max-width: none;
   object-fit: contain;
-  filter: drop-shadow(0 32px 64px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.28));
+  will-change: transform, opacity;
 }
 
 .bottle-reflection {

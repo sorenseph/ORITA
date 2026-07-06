@@ -42,7 +42,7 @@ function onChannelClick(ch) {
     <BeachDecor />
     <div class="tropical-grain pointer-events-none absolute inset-0 opacity-[0.04]" aria-hidden="true" />
 
-    <div class="relative z-10 mx-auto max-w-6xl px-5 md:px-8">
+    <div class="content-layer mx-auto max-w-6xl px-5 md:px-8">
       <header class="mb-12 text-center md:mb-16">
         <img src="/images/logo_footer.png" alt="Orita" class="mx-auto mb-6 h-12 w-auto md:h-14" />
         <p class="mb-3 font-body text-sm tracking-[0.3em] text-white/70 uppercase">{{ t('contact.eyebrow') }}</p>
@@ -89,9 +89,6 @@ function onChannelClick(ch) {
               </li>
             </ul>
           </div>
-          <div class="overflow-hidden rounded-3xl">
-            <img src="/recursos/hojas/hoja3.png" alt="" class="h-40 w-full object-cover object-center opacity-90 md:h-48" loading="lazy" />
-          </div>
         </div>
 
         <form class="lg:col-span-3 space-y-5 rounded-3xl bg-[#F7F0E3] p-6 text-[#2A2018] shadow-xl md:p-10" novalidate @submit="handleSubmit">
@@ -115,7 +112,7 @@ function onChannelClick(ch) {
               {{ t('contact.fields.phone') }}
               <span class="font-normal text-[#2A2018]/45">({{ t('contact.phoneHint') }})</span>
             </label>
-            <input id="contact-phone" :value="form.phone" type="tel" inputmode="numeric" autocomplete="tel" :maxlength="PHONE_MAX" class="field-input" :class="touched.phone && errors.phone ? 'border-red-400' : ''" :placeholder="t('contact.placeholders.phone')" @input="onPhoneInput" @blur="onBlur('phone')" />
+            <input id="contact-phone" :value="form.phone" type="number" inputmode="numeric" autocomplete="tel" min="0" :maxlength="PHONE_MAX" class="field-input" :class="touched.phone && errors.phone ? 'border-red-400' : ''" :placeholder="t('contact.placeholders.phone')" @input="onPhoneInput" @blur="onBlur('phone')" />
             <p v-if="touched.phone && errors.phone" class="mt-1 text-xs text-red-500">{{ errorText('phone') }}</p>
           </div>
 
@@ -148,4 +145,7 @@ function onChannelClick(ch) {
   color: #2A2018; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
 }
 .field-input:focus { border-color: #4AAB9E; box-shadow: 0 0 0 3px rgba(74,171,158,0.15); }
+.field-input[type='number'] { -moz-appearance: textfield; }
+.field-input[type='number']::-webkit-outer-spin-button,
+.field-input[type='number']::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 </style>

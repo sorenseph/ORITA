@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { useMouse } from '@vueuse/core'
+import { useMouse, useWindowSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useThemeStore } from '../../stores/theme'
 
@@ -10,36 +10,49 @@ defineProps({
 
 const { activeFlavor } = storeToRefs(useThemeStore())
 const { x: mouseX, y: mouseY } = useMouse()
+const { width } = useWindowSize()
 
-const collage = computed(() => activeFlavor.value.collage || [])
+const isMobile = computed(() => width.value < 768)
+
+const collage = computed(() => {
+  const items = activeFlavor.value.collage || []
+  return isMobile.value ? items.slice(0, 2) : items
+})
 
 function collageStyle(item, i) {
-  const cx = typeof window !== 'undefined' ? window.innerWidth / 2 : 0
+  const mobile = isMobile.value
+  const scale = mobile ? 0.58 : 1
+  const cx = width.value / 2
   const cy = typeof window !== 'undefined' ? window.innerHeight / 2 : 0
-  const dx = (mouseX.value - cx) / cx
-  const dy = (mouseY.value - cy) / cy
-  const factor = 10 + i * 4
+  const dx = mobile ? 0 : (mouseX.value - cx) / cx
+  const dy = mobile ? 0 : (mouseY.value - cy) / cy
+  const factor = mobile ? 0 : 10 + i * 4
   return {
     top: item.top,
     bottom: item.bottom,
     left: item.left,
     right: item.right,
-    width: `${item.w}px`,
+    width: `${Math.round(item.w * scale)}px`,
     transform: `${item.centerX ? 'translateX(-50%)' : ''} rotate(${item.rotate + dx * 8}deg) translate(${dx * factor}px, ${dy * factor}px)`,
     animationDelay: `${item.delay}s`,
+    opacity: mobile ? 0.5 : 1,
   }
 }
 </script>
 
 <template>
   <Transition name="collage-wrap">
-    <div :key="activeFlavor.id" class="pointer-events-none absolute inset-0 z-[4] overflow-hidden" aria-hidden="true">
+    <div
+      :key="activeFlavor.id"
+      class="collage-layer decor-layer overflow-hidden"
+      aria-hidden="true"
+    >
       <img
         v-for="(item, i) in collage"
         :key="`${activeFlavor.id}-${i}`"
         :src="item.img"
         alt=""
-        class="collage-orbit absolute max-w-none object-contain drop-shadow-[0_16px_40px_rgba(0,0,0,0.2)]"
+        class="collage-orbit absolute max-w-none object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.15)]"
         :style="collageStyle(item, i)"
         loading="lazy"
       />
@@ -48,11 +61,30 @@ function collageStyle(item, i) {
 </template>
 
 <style scoped>
-.collage-orbit { animation: orbitFloat 5s ease-in-out infinite; }
-.collage-wrap-enter-active, .collage-wrap-leave-active { transition: opacity 0.45s ease; }
-.collage-wrap-enter-from, .collage-wrap-leave-to { opacity: 0; }
+@media (max-width: 767px) {
+  .collage-layer {
+    mask-image: linear-gradient(to bottom, black 0%, black 50%, transparent 78%);
+  }
+}
+
+@media (min-width: 768px) {
+  .collage-orbit {
+    animation: orbitFloat 5s ease-in-out infinite;
+  }
+}
+
+.collage-wrap-enter-active,
+.collage-wrap-leave-active {
+  transition: opacity 0.45s ease;
+}
+
+.collage-wrap-enter-from,
+.collage-wrap-leave-to {
+  opacity: 0;
+}
+
 @keyframes orbitFloat {
   0%, 100% { translate: 0 0; }
-  50% { translate: 0 -14px; }
+  50% { translate: 0 -10px; }
 }
 </style>

@@ -2,8 +2,7 @@
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCartStore } from '../../stores/cart'
-import { useThemeStore } from '../../stores/theme'
-import { scrollTo } from '../../composables/useLenis'
+import { scrollTo, stopScroll, startScroll } from '../../composables/useLenis'
 import { useNavSurface } from '../../composables/useNavSurface'
 import { setLocale } from '../../i18n'
 import gsap from 'gsap'
@@ -12,18 +11,32 @@ const NAV_OFFSET = -96
 
 const { t, locale } = useI18n()
 const cart = useCartStore()
-const theme = useThemeStore()
 
 const navRef = ref(null)
 const menuOpen = ref(false)
 
-const { navTone, refresh } = useNavSurface(() =>
-  theme.activeFlavor.textOnBg === '#2A2018' ? 'dark-text' : 'light-text',
-)
+const { navTone, inHero, refresh } = useNavSurface(null, () => menuOpen.value)
 
-const isLightUi = computed(() => navTone.value === 'light')
+/** En hero: nav oscuro fijo (legible en todos los sabores). Fuera: detección por sección. */
+const isLightUi = computed(() => !inHero.value && navTone.value === 'light')
 
-watch(() => theme.activeFlavor.id, () => refresh())
+watch(menuOpen, (open) => {
+  if (open) {
+    stopScroll()
+    document.body.style.overflow = 'hidden'
+  } else {
+    startScroll()
+    document.body.style.overflow = ''
+    refresh()
+  }
+})
+
+onUnmounted(() => {
+  if (menuOpen.value) {
+    startScroll()
+    document.body.style.overflow = ''
+  }
+})
 
 const links = computed(() => [
   { label: t('nav.story'), href: '#story' },
@@ -49,27 +62,25 @@ onMounted(() => {
 <template>
   <header
     ref="navRef"
-    class="pointer-events-none fixed left-1/2 top-5 z-50 w-[94%] max-w-6xl -translate-x-1/2 md:top-6"
+    class="nav-shell pointer-events-none fixed inset-x-0 top-0 z-50 px-[3vw] pt-5 md:top-0 md:px-6 md:pt-6"
   >
     <div
-      class="nav-glass pointer-events-auto flex items-center justify-between gap-3 rounded-full border px-4 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-500 md:gap-4 md:px-6 md:py-3"
+      class="nav-glass pointer-events-auto mx-auto flex h-[52px] max-w-6xl items-center justify-between gap-3 rounded-full border px-4 md:h-[56px] md:gap-4 md:px-6"
       :class="isLightUi
-        ? 'border-white/25 bg-white/10'
-        : 'border-[#2A2018]/10 bg-white/40'"
+        ? 'nav-glass--light'
+        : 'nav-glass--dark'"
     >
       <a
         href="#"
-        class="relative z-10 shrink-0 transition-opacity hover:opacity-90"
+        class="relative z-10 shrink-0"
         :aria-label="t('nav.home')"
         @click.prevent="scrollTo(0)"
       >
         <img
           src="/images/logo_header.png"
           alt="Orita"
-          class="h-7 w-auto transition-all md:h-9"
-          :class="isLightUi
-            ? 'brightness-0 invert drop-shadow-[0_1px_4px_rgba(0,0,0,0.35)]'
-            : 'drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]'"
+          class="nav-logo h-7 w-auto md:h-9"
+          :class="isLightUi ? 'nav-logo--light' : 'nav-logo--dark'"
         />
       </a>
 
@@ -77,25 +88,25 @@ onMounted(() => {
         <button
           v-for="link in links"
           :key="link.href"
-          class="group relative font-body text-[13px] font-medium tracking-wide transition-colors"
-          :class="isLightUi ? 'text-white/85 hover:text-white' : 'text-[#2A2018]/70 hover:text-[#2A2018]'"
+          class="nav-link group relative font-body text-[13px] font-medium tracking-wide"
+          :class="isLightUi ? 'nav-link--light' : 'nav-link--dark'"
           @click="navigate(link.href)"
         >
           {{ link.label }}
           <span
-            class="absolute -bottom-1 left-0 h-px w-0 transition-all duration-300 group-hover:w-full"
+            class="absolute -bottom-1 left-0 h-px w-0 transition-[width] duration-300 group-hover:w-full"
             :class="isLightUi ? 'bg-white/80' : 'bg-[#4AAB9E]'"
           />
         </button>
       </nav>
 
-      <div class="flex items-center gap-1.5 md:gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 md:gap-2">
         <div
           class="hidden items-center rounded-full p-0.5 sm:flex"
           :class="isLightUi ? 'bg-white/15' : 'bg-[#2A2018]/8'"
         >
           <button
-            class="rounded-full px-2.5 py-1 font-body text-[11px] font-semibold transition-all"
+            class="rounded-full px-2.5 py-1 font-body text-[11px] font-semibold transition-colors duration-300"
             :class="locale === 'es'
               ? (isLightUi ? 'bg-white text-[#2A2018]' : 'bg-[#2A2018] text-white')
               : (isLightUi ? 'text-white/60' : 'text-[#2A2018]/45')"
@@ -104,7 +115,7 @@ onMounted(() => {
             ES
           </button>
           <button
-            class="rounded-full px-2.5 py-1 font-body text-[11px] font-semibold transition-all"
+            class="rounded-full px-2.5 py-1 font-body text-[11px] font-semibold transition-colors duration-300"
             :class="locale === 'en'
               ? (isLightUi ? 'bg-white text-[#2A2018]' : 'bg-[#2A2018] text-white')
               : (isLightUi ? 'text-white/60' : 'text-[#2A2018]/45')"
@@ -124,13 +135,13 @@ onMounted(() => {
           <img
             src="/images/instagram.png"
             alt=""
-            class="h-4 w-4 transition-opacity hover:opacity-100"
-            :class="isLightUi ? 'brightness-0 invert opacity-85' : 'opacity-65'"
+            class="h-4 w-4"
+            :class="isLightUi ? 'nav-icon--light' : 'nav-icon--dark'"
           />
         </a>
 
         <button
-          class="hidden items-center gap-1.5 rounded-full px-3.5 py-2 font-body text-[12px] font-semibold transition-all md:flex"
+          class="hidden items-center gap-1.5 rounded-full px-3.5 py-2 font-body text-[12px] font-semibold transition-colors duration-300 md:flex"
           :class="isLightUi
             ? 'bg-white/90 text-[#2A2018] hover:bg-white'
             : 'bg-[#4AAB9E] text-white hover:bg-[#3d9a8e]'"
@@ -146,13 +157,13 @@ onMounted(() => {
         </button>
 
         <button
-          class="relative flex h-9 w-9 items-center justify-center rounded-full transition-all md:h-10 md:w-10"
+          class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-10 md:w-10"
           :class="isLightUi ? 'hover:bg-white/15' : 'hover:bg-[#2A2018]/8'"
           :aria-label="t('nav.cart')"
           @click="cart.openCart('drawer')"
         >
           <svg
-            class="h-[18px] w-[18px]"
+            class="h-[18px] w-[18px] transition-colors duration-300"
             :class="isLightUi ? 'text-white' : 'text-[#2A2018]'"
             fill="none"
             stroke="currentColor"
@@ -169,51 +180,135 @@ onMounted(() => {
         </button>
 
         <button
-          class="flex h-9 w-9 items-center justify-center rounded-full lg:hidden"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full lg:hidden"
           :class="isLightUi ? 'hover:bg-white/15' : 'hover:bg-[#2A2018]/8'"
           :aria-label="t('nav.menu')"
           @click="menuOpen = !menuOpen"
         >
           <span class="flex flex-col gap-1.5">
             <span
-              class="block h-0.5 w-4 transition-transform"
+              class="block h-0.5 w-4 transition-transform duration-200"
               :class="[isLightUi ? 'bg-white' : 'bg-[#2A2018]', menuOpen && 'translate-y-2 rotate-45']"
             />
             <span
-              class="block h-0.5 w-4 transition-opacity"
+              class="block h-0.5 w-4 transition-opacity duration-200"
               :class="[isLightUi ? 'bg-white' : 'bg-[#2A2018]', menuOpen && 'opacity-0']"
             />
             <span
-              class="block h-0.5 w-4 transition-transform"
+              class="block h-0.5 w-4 transition-transform duration-200"
               :class="[isLightUi ? 'bg-white' : 'bg-[#2A2018]', menuOpen && '-translate-y-2 -rotate-45']"
             />
           </span>
         </button>
       </div>
     </div>
+  </header>
 
+  <Teleport to="body">
     <Transition name="menu">
-      <div v-if="menuOpen" class="pointer-events-auto fixed inset-0 z-40 flex flex-col items-center justify-center gap-6 bg-[#F7F0E3]/95 backdrop-blur-xl lg:hidden">
+      <div
+        v-if="menuOpen"
+        data-nav-menu
+        class="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-[#F7F0E3]/98 backdrop-blur-xl lg:hidden"
+        @click.self="menuOpen = false"
+      >
+        <button
+          class="absolute top-6 right-6 flex h-10 w-10 items-center justify-center rounded-full bg-[#2A2018]/8 text-[#2A2018]"
+          :aria-label="t('nav.close')"
+          @click="menuOpen = false"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
         <img src="/images/logo_footer.png" alt="Orita" class="mb-4 h-12 w-auto" />
         <button
           v-for="link in links"
           :key="link.href"
-          class="font-display text-3xl font-bold text-[#2A2018]"
+          class="font-display text-3xl font-bold text-[#2A2018] transition-opacity hover:opacity-70"
           @click="navigate(link.href)"
         >
           {{ link.label }}
         </button>
       </div>
     </Transition>
-  </header>
+  </Teleport>
 </template>
 
 <style scoped>
+.nav-shell {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
 .nav-glass {
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   backdrop-filter: blur(20px) saturate(160%);
+  transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-.menu-enter-active, .menu-leave-active { transition: opacity 0.3s ease; }
-.menu-enter-from, .menu-leave-to { opacity: 0; }
+.nav-glass--light {
+  border-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.nav-glass--dark {
+  border-color: rgba(42, 32, 24, 0.1);
+  background-color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 32px rgba(42, 32, 24, 0.1);
+}
+
+.nav-logo {
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+
+.nav-logo--light {
+  filter: brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+.nav-logo--dark {
+  filter: brightness(0);
+}
+
+.nav-icon--light {
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
+.nav-icon--dark {
+  filter: brightness(0);
+  opacity: 0.8;
+}
+
+.nav-link {
+  transition: color 0.4s ease;
+}
+
+.nav-link--light {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-link--light:hover {
+  color: #fff;
+}
+
+.nav-link--dark {
+  color: #2a2018;
+}
+
+.nav-link--dark:hover {
+  color: #000;
+}
+
+.menu-enter-active,
+.menu-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.menu-enter-from,
+.menu-leave-to {
+  opacity: 0;
+}
 </style>

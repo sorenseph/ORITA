@@ -57,7 +57,9 @@ export function useContactForm() {
   }
 
   function onPhoneInput(e) {
-    form.phone = sanitizePhone(e.target.value)
+    const raw = String(e.target.value ?? '').replace(/\D/g, '').slice(0, PHONE_MAX)
+    form.phone = raw
+    e.target.value = raw
     if (touched.phone) validateField('phone')
   }
 

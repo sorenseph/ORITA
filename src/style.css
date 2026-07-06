@@ -26,6 +26,7 @@
 
   html {
     scroll-behavior: auto;
+    scrollbar-gutter: stable;
   }
 
   html.lenis,
@@ -103,6 +104,25 @@
   .tropical-grain {
     background-image: url("/svg/sand.svg");
     background-size: 200px 200px;
+  }
+
+  .decor-layer {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .content-layer {
+    position: relative;
+    z-index: 10;
+  }
+
+  @media (max-width: 767px) {
+    .section-sand--light.tropical-grain {
+      background-size: 280px 280px;
+    }
   }
 
   .tropical-highlight {

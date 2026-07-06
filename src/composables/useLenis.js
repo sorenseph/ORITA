@@ -7,6 +7,10 @@ gsap.registerPlugin(ScrollTrigger)
 
 let lenisInstance = null
 
+export function getLenis() {
+  return lenisInstance
+}
+
 export function useLenis() {
   onMounted(() => {
     lenisInstance = new Lenis({
@@ -44,6 +48,16 @@ export function scrollTo(target, options = {}) {
     const el = typeof target === 'string' ? document.querySelector(target) : target
     el?.scrollIntoView({ behavior: 'smooth' })
   }
+}
+
+export function stopScroll() {
+  lenisInstance?.stop()
+  document.documentElement.classList.add('lenis-stopped')
+}
+
+export function startScroll() {
+  lenisInstance?.start()
+  document.documentElement.classList.remove('lenis-stopped')
 }
 
 export { gsap, ScrollTrigger }

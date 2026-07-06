@@ -7,6 +7,7 @@ import { gsap } from '../../composables/useLenis'
 import LottieIcon from '../ui/LottieIcon.vue'
 import FluidMorphBg from '../ui/FluidMorphBg.vue'
 import BeachDecor from '../tropical/BeachDecor.vue'
+import SmallLeaves from '../tropical/SmallLeaves.vue'
 import TropicalSplash from '../tropical/TropicalSplash.vue'
 
 const { t } = useI18n()
@@ -48,20 +49,20 @@ onUnmounted(() => { if (autoplayRef.value) clearInterval(autoplayRef.value) })
   <section id="story" ref="sectionRef" class="relative">
     <div class="story-brand relative overflow-hidden bg-[#3BBFA3] px-5 py-20 md:px-8 md:py-28" data-nav-contrast="dark">
       <TropicalSplash color="#F7F0E3" flip simple />
-      <BeachDecor />
-      <div class="relative z-10 mx-auto max-w-3xl text-center">
+      <BeachDecor minimal />
+      <div class="content-layer mx-auto max-w-3xl text-center">
         <p class="motion-reveal mb-6 font-editorial text-lg italic text-white/90 md:text-xl">{{ t('story.brandEyebrow') }}</p>
         <h2 class="motion-reveal font-editorial text-[clamp(2rem,6vw,4.5rem)] font-semibold leading-[1.05] text-white">
           {{ t('story.brandLine1') }}<br />{{ t('story.brandLine2') }}<br />{{ t('story.brandLine3') }}
         </h2>
         <p class="motion-reveal mx-auto mt-8 max-w-lg font-body text-base text-white/80 md:text-lg">{{ t('story.brandSubline') }}</p>
       </div>
-      <TropicalSplash color="#F7F0E3" animated ocean />
+      <TropicalSplash color="#F7F0E3" animated ocean class="hidden md:block" />
     </div>
 
     <div class="relative py-20 md:py-32" data-nav-contrast="light">
-      <BeachDecor light />
-      <div class="relative z-10 mx-auto max-w-6xl px-5 md:px-8">
+      <SmallLeaves />
+      <div class="content-layer mx-auto max-w-6xl px-5 md:px-8">
         <div class="motion-reveal mb-12 text-center md:mb-16">
           <p class="mb-3 font-body text-sm tracking-[0.3em] text-[#4AAB9E] uppercase">{{ t('story.eyebrow') }}</p>
           <h2 class="font-display text-4xl font-bold text-[#2A2018] md:text-6xl">
