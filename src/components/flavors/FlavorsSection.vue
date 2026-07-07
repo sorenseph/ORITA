@@ -112,11 +112,6 @@ useSectionLife(sectionRef)
 onMounted(async () => {
   activePanel.value = theme.activeFlavorIndex
   await nextTick()
-  gsap.from('.flavors-heading > *', {
-    y: 40, opacity: 0, duration: 1, stagger: 0.08,
-    scrollTrigger: { trigger: sectionRef.value, start: 'top 80%', once: true },
-    clearProps: 'opacity,transform',
-  })
   startAutoplay()
   onBottleStageEnter()
 })
@@ -166,7 +161,7 @@ onUnmounted(() => {
           <span class="text-[#2A2018]">←</span>
         </button>
 
-        <div class="flex flex-1 gap-2 overflow-x-auto hide-scrollbar md:flex-wrap md:overflow-visible" data-lenis-prevent>
+        <div class="flex flex-1 gap-2 overflow-x-auto hide-scrollbar md:flex-wrap md:overflow-visible">
           <button
             v-for="(flavor, idx) in flavors"
             :key="flavor.id"
@@ -244,7 +239,7 @@ onUnmounted(() => {
               <p class="mb-4 font-body text-sm leading-relaxed md:mb-6 md:text-lg" :style="{ color: INK_MUTED }">
                 {{ activeLocalized.description }}
               </p>
-              <ul class="mb-5 flex gap-3 overflow-x-auto hide-scrollbar md:mb-8 md:block md:space-y-2 md:overflow-visible" data-lenis-prevent>
+              <ul class="mb-5 flex gap-3 overflow-x-auto hide-scrollbar md:mb-8 md:block md:space-y-2 md:overflow-visible">
                 <li
                   v-for="ing in activeLocalized.ingredients"
                   :key="ing.key"

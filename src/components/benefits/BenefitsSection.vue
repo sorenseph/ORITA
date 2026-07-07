@@ -1,9 +1,8 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocalizedBenefits } from '../../composables/useLocalizedContent'
 import { gsap } from '../../composables/useLenis'
-import { countUp } from '../../composables/useAnimations'
 import { useBenefitHover } from '../../composables/useBenefitHover'
 import { useSectionLife } from '../../composables/useSectionLife'
 
@@ -12,6 +11,7 @@ const benefits = useLocalizedBenefits()
 const sectionRef = ref(null)
 const statRefs = ref([])
 const activeSlide = ref(0)
+let countObserver = null
 
 useSectionLife(sectionRef)
 useBenefitHover(sectionRef)
@@ -25,24 +25,44 @@ function onCarouselScroll(e) {
   activeSlide.value = Math.round(el.scrollLeft / step)
 }
 
+function runCountUp(el, endValue, decimals) {
+  const obj = { val: 0 }
+  gsap.to(obj, {
+    val: endValue,
+    duration: 1.6,
+    ease: 'power2.out',
+    onUpdate: () => {
+      el.textContent = decimals ? obj.val.toFixed(decimals) : String(Math.round(obj.val))
+    },
+  })
+}
+
 onMounted(() => {
-  gsap.from('.benefits-heading > *', {
-    y: 50, opacity: 0, duration: 1, stagger: 0.08,
-    scrollTrigger: { trigger: sectionRef.value, start: 'top 80%', once: true },
-    clearProps: 'opacity,transform',
-  })
-  gsap.from('.benefit-card', {
-    y: 40, opacity: 0, duration: 0.8, stagger: 0.12,
-    scrollTrigger: { trigger: sectionRef.value, start: 'top 75%', once: true },
-    clearProps: 'opacity,transform',
-  })
+  countObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        const el = entry.target
+        const end = parseFloat(el.dataset.countEnd)
+        const decimals = el.dataset.countDecimals ? parseInt(el.dataset.countDecimals, 10) : 0
+        runCountUp(el, end, decimals)
+        countObserver.unobserve(el)
+      })
+    },
+    { threshold: 0.4 },
+  )
+
   benefits.value.forEach((b, i) => {
     const el = statRefs.value[i]
-    if (!el) return
-    if (b.stat !== '0' && b.stat !== '100') {
-      countUp(el, parseFloat(b.stat), { decimals: b.stat.includes('.') ? 1 : 0 })
-    }
+    if (!el || b.stat === '0' || b.stat === '100') return
+    el.dataset.countEnd = b.stat
+    if (b.stat.includes('.')) el.dataset.countDecimals = '1'
+    countObserver.observe(el)
   })
+})
+
+onUnmounted(() => {
+  countObserver?.disconnect()
 })
 </script>
 
@@ -59,7 +79,6 @@ onMounted(() => {
 
       <div
         class="peek-carousel -mx-5 hide-scrollbar md:mx-0 md:grid md:grid-cols-2 md:gap-5"
-        data-lenis-prevent
         @scroll="onCarouselScroll"
       >
         <div

@@ -105,7 +105,6 @@ watch(() => props.activeIndex, async (next, prev) => {
 onMounted(async () => {
   await nextTick()
   layoutSlots(false)
-  gsap.from(rootRef.value, { opacity: 0, y: 40, duration: 1.1, ease: 'power3.out' })
 })
 
 onUnmounted(() => {

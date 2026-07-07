@@ -5,8 +5,13 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
+ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true })
+
+const SMOOTH_WHEEL = false
+
 let lenisInstance = null
 let lenisRaf = null
+let scrollListener = null
 
 function prefersReducedMotion() {
   return typeof window !== 'undefined'
@@ -23,39 +28,60 @@ export function getLenis() {
 }
 
 export function useLenis() {
-  let stTicking = false
-
-  function onLenisScroll() {
-    if (stTicking) return
-    stTicking = true
-    requestAnimationFrame(() => {
-      ScrollTrigger.update()
-      stTicking = false
-    })
-  }
-
   onMounted(() => {
     if (prefersReducedMotion() || isCoarsePointer()) return
 
     lenisInstance = new Lenis({
-      duration: 1.05,
+      duration: 0.65,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
+      smoothWheel: SMOOTH_WHEEL,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.2,
+      infinite: false,
     })
 
-    lenisInstance.on('scroll', onLenisScroll)
+    if (SMOOTH_WHEEL) {
+      const root = document.documentElement
+      ScrollTrigger.scrollerProxy(root, {
+        scrollTop(value) {
+          if (arguments.length) {
+            lenisInstance.scrollTo(value, { immediate: true, force: true })
+          }
+          return lenisInstance.scroll
+        },
+        getBoundingClientRect() {
+          return {
+            top: 0,
+            left: 0,
+            width: window.innerWidth,
+            height: window.innerHeight,
+          }
+        },
+        pinType: root.style.transform ? 'transform' : 'fixed',
+      })
+      ScrollTrigger.defaults({ scroller: root })
+      lenisInstance.on('scroll', ScrollTrigger.update)
+    } else {
+      scrollListener = () => ScrollTrigger.update()
+      window.addEventListener('scroll', scrollListener, { passive: true })
+    }
 
     lenisRaf = (time) => {
       lenisInstance?.raf(time * 1000)
     }
     gsap.ticker.add(lenisRaf)
+    gsap.ticker.lagSmoothing(0)
 
     document.documentElement.classList.add('lenis', 'lenis-smooth')
+    requestAnimationFrame(() => ScrollTrigger.refresh())
   })
 
   onUnmounted(() => {
+    if (scrollListener) {
+      window.removeEventListener('scroll', scrollListener)
+      scrollListener = null
+    }
     if (lenisRaf) {
       gsap.ticker.remove(lenisRaf)
       lenisRaf = null

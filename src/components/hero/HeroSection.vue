@@ -117,7 +117,6 @@ onMounted(async () => {
     trigger: sectionRef.value,
     start: 'top top',
     end: 'bottom top',
-    scrub: 0.6,
     onUpdate: (self) => { scrollProgress.value = self.progress },
   })
 
